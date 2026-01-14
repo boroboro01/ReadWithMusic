@@ -67,10 +67,22 @@ const mockVideos = [
     duration: "1:22:54",
   },
   {
+    youtubeId: "nQdjlkBF9rM",
+    title: "Jazz Night｜Soul-Jazz & Jazz-Funk Vinyl Set",
+    author: "見本盤Mihon Reko",
+    duration: "00:36:26",
+  },
+  {
     youtubeId: "7lq6e4Lu4B8",
     title: "Playlist | 지브리, 재즈 | GHIBLI Jazz",
     author: "JazzNe",
     duration: "10:37:30",
+  },
+  {
+    youtubeId: "3C01eaL5_Xw",
+    title: "I Love You | 60's - 70's Rhythm and Soul Playlist",
+    author: "MISTAH CEE",
+    duration: "00:46:14",
   },
 ];
 

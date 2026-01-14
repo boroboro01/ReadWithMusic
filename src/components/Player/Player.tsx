@@ -3,6 +3,12 @@ import YouTube from "react-youtube";
 import type { YouTubeProps } from "react-youtube";
 import "../../styles/player.css";
 import type { Video } from "../../types/video";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faVolumeHigh,
+  faVolumeLow,
+  faVolumeXmark,
+} from "@fortawesome/free-solid-svg-icons";
 
 type Props = {
   selectedVideo: Video | null;
@@ -13,6 +19,9 @@ const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [pendingPlay, setPendingPlay] = useState(false);
+  const [volume, setVolume] = useState<number>(60);
+  const [muted, setMuted] = useState<boolean>(false);
+  const [lastVolume, setLastVolume] = useState<number>(60);
   const playerRef = useRef<any>(null);
 
   // Spacebar toggles play/pause when a video is selected and no input is focused
@@ -62,6 +71,15 @@ const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
 
   const onReady: YouTubeProps["onReady"] = (event) => {
     playerRef.current = event.target;
+    try {
+      if (playerRef.current && playerRef.current.setVolume) {
+        playerRef.current.setVolume(volume);
+      }
+      if (muted && playerRef.current?.mute) playerRef.current.mute();
+      else if (!muted && playerRef.current?.unMute) playerRef.current.unMute();
+    } catch (e) {
+      // noop
+    }
     if (pendingPlay && playerRef.current && playerRef.current.playVideo) {
       try {
         // attempt to play (autoplay may be allowed depending on browser/user gesture)
@@ -96,6 +114,48 @@ const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
     else playerRef.current.playVideo();
   };
 
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!playerRef.current) return;
+    if (muted) {
+      playerRef.current.unMute?.();
+      if (lastVolume != null) playerRef.current.setVolume?.(lastVolume);
+      setMuted(false);
+    } else {
+      // remember current volume before muting
+      setLastVolume(volume);
+      playerRef.current.mute?.();
+      setMuted(true);
+    }
+  };
+
+  const onVolumeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    const v = Math.max(0, Math.min(100, Number(e.target.value)));
+    setVolume(v);
+    if (playerRef.current?.setVolume) {
+      try {
+        playerRef.current.setVolume(v);
+      } catch {}
+    }
+    if (muted && v > 0) {
+      // unmute when user drags slider up
+      playerRef.current?.unMute?.();
+      setMuted(false);
+    }
+    if (v > 0) setLastVolume(v);
+  };
+
+  // Keep player volume/mute in sync when state changes (safety net)
+  useEffect(() => {
+    if (!playerRef.current) return;
+    try {
+      if (playerRef.current.setVolume) playerRef.current.setVolume(volume);
+      if (muted) playerRef.current.mute?.();
+      else playerRef.current.unMute?.();
+    } catch {}
+  }, [volume, muted]);
+
   if (!selectedVideo) {
     // render invisible container to allow CSS to hide/show consistently
     return <div className="player-container hidden" />;
@@ -121,13 +181,40 @@ const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
           <div className="title">{selectedVideo.title}</div>
           <div className="author">{selectedVideo.author}</div>
         </div>
-        <button
-          className="play-btn"
-          onClick={togglePlay}
-          aria-label={isPlaying ? "Pause" : "Play"}
-        >
-          {isPlaying ? "❚❚" : "▶"}
-        </button>
+        <div className="mini-right">
+          <div
+            className="mini-controls"
+            onClick={(e) => e.stopPropagation()}
+            aria-label="Volume controls"
+          >
+            <FontAwesomeIcon
+              className="volume-icon"
+              icon={
+                muted || volume === 0
+                  ? faVolumeXmark
+                  : volume < 50
+                  ? faVolumeLow
+                  : faVolumeHigh
+              }
+            />
+            <input
+              className="volume-slider"
+              type="range"
+              min={0}
+              max={100}
+              value={muted ? 0 : volume}
+              onChange={onVolumeInput}
+              aria-label="Volume"
+            />
+          </div>
+          <button
+            className="play-btn"
+            onClick={togglePlay}
+            aria-label={isPlaying ? "Pause" : "Play"}
+          >
+            {isPlaying ? "❚❚" : "▶"}
+          </button>
+        </div>
       </div>
 
       {/* Expanded full player content */}
@@ -144,6 +231,8 @@ const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
           </div>
           <div style={{ marginLeft: "auto" }} />
         </div>
+
+        {/* Volume controls moved to mini bar */}
 
         <div className="youtube-wrapper">
           <YouTube

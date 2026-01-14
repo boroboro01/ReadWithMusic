@@ -68,7 +68,18 @@
 }
 
 .play-btn {
-  margin-left: auto;
+  background: transparent;
+  color: #f9fafb;
+  border: none;
+  font-size: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.volume-btn {
+  margin-left: 6px;
   background: transparent;
   color: #f9fafb;
   border: none;
@@ -104,6 +115,19 @@
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0));
 }
 
+.mini-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mini-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .player-header {
   display: flex;
   align-items: center;
@@ -137,6 +161,49 @@
   max-height: 60vh; /* 세로가 화면의 60%를 넘지 않게 제한 */
   margin: 20px auto; /* 중앙 정렬 */
   background: #333;
+}
+
+.player-controls { display: none; }
+
+.volume-icon {
+  font-size: 16px;
+  color: #e5e7eb;
+  opacity: 0.9;
+}
+
+.volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  width: 160px;
+  border-radius: 999px;
+  background: #3a3a3a;
+  outline: none;
+}
+
+/* Slightly narrower slider inside the mini bar for space */
+.mini-controls .volume-slider {
+  width: 120px;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #f9fafb;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #f9fafb;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* 내부 iframe이 위에서 제한한 영역을 꽉 채우게 함 */
