@@ -13,9 +13,10 @@ import {
 type Props = {
   selectedVideo: Video | null;
   onClose?: () => void; // optional: parent may clear selection
+  onEnd?: () => void;
 };
 
-const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
+const Player: React.FC<Props> = ({ selectedVideo, onClose, onEnd }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [pendingPlay, setPendingPlay] = useState(false);
@@ -248,6 +249,7 @@ const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
             }}
             onReady={onReady}
             onStateChange={onStateChange}
+            onEnd={onEnd}
           />
         </div>
       </div>
