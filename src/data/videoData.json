@@ -1,0 +1,95 @@
+{
+  "playlists": [
+    {
+      "id": "PL_JAZZ_001",
+      "title": "어느 책이든 어울리는 잔잔한 재즈",
+      "targetBooks": "무라카미 하루키 소설, 에세이"
+    }
+  ],
+  "videos": [
+    {
+      "youtube_id": "MYPVQccHhAQ",
+      "title": "4K Cozy Coffee Shop with Smooth Piano Jazz Music for Relaxing",
+      "author": "Relaxing Jazz Piano",
+      "duration": "3:35:22",
+      "playlist_id": "PL_JAZZ_001"
+    },
+    {
+      "youtube_id": "nv_2rz5BFDA",
+      "title": "Just Thinking...Retro Jazz",
+      "author": "Pause,maybe?",
+      "duration": "2:54:00",
+      "playlist_id": "PL_JAZZ_001"
+    },
+    {
+      "youtube_id": "3SGNtFQ1v3M",
+      "title": "Chill Jazz 🎼 Smooth Jazz Music",
+      "author": "Jazzip",
+      "duration": "3:17:52",
+      "playlist_id": "PL_JAZZ_001"
+    },
+    {
+      "youtube_id": "8zr_bWR8Yk4",
+      "title": "Charming Fall Jazz in Cozy Outdoor Café",
+      "author": "Cozy Outdoor Jazz",
+      "duration": "3:14:02",
+      "playlist_id": "PL_JAZZ_001"
+    },
+    {
+      "youtube_id": "U9Ji1RoA4hk",
+      "title": "🦃 Snoopy Thanksgiving Jazz",
+      "author": "EASE JAZZ",
+      "duration": "1:07:30",
+      "playlist_id": "PL_JAZZ_001"
+    },
+    {
+      "youtube_id": "0FEVmjeS6XM",
+      "title": "DISNEY 50 Jazz Covers from Disney Classics",
+      "author": "Massiomo Roberti",
+      "duration": "2:42:41",
+      "playlist_id": "PL_JAZZ_001"
+    },
+    {
+      "youtube_id": "y7gfL33XA70",
+      "title": "BGM The Beatles in JAZZ 30 Greatest Hits",
+      "author": "Massiomo Roberti",
+      "duration": "1:33:39",
+      "playlist_id": "PL_JAZZ_001"
+    },
+    {
+      "youtube_id": "ecAR5gVCRmE",
+      "title": "Playlist | 픽사, 재즈",
+      "author": "JazzNe",
+      "duration": "10:08:05",
+      "playlist_id": "PL_JAZZ_001"
+    },
+    {
+      "youtube_id": "ziOus5-1kXw",
+      "title": "coulou's vinyl cafe (no. 1) - jazz selections",
+      "author": "COULOU",
+      "duration": "1:22:54",
+      "playlist_id": "PL_JAZZ_001"
+    },
+    {
+      "youtube_id": "nQdjlkBF9rM",
+      "title": "Jazz Night｜Soul-Jazz & Jazz-Funk Vinyl Set",
+      "author": "見본반Mihon Reko",
+      "duration": "0:36:26",
+      "playlist_id": "PL_JAZZ_001"
+    },
+    {
+      "youtube_id": "7lq6e4Lu4B8",
+      "title": "Playlist | 지브리, 재즈 | GHIBLI Jazz",
+      "author": "JazzNe",
+      "duration": "10:37:30",
+      "playlist_id": "PL_JAZZ_001"
+    },
+    {
+      "youtube_id": "3C01eaL5_Xw",
+      "title": "I Love You | 60's - 70's Rhythm and Soul Playlist",
+      "author": "MISTAH CEE",
+      "duration": "0:46:14",
+      "playlist_id": "PL_JAZZ_001"
+    }
+  ]
+}
