@@ -4,6 +4,7 @@ import ContentContainer from "../components/layout/ContentContainer";
 import HorizontalList from "../components/list/HorizontalList";
 import VideoCard from "../components/card/VideoCard";
 import Player from "../components/Player/Player";
+import PlaylistTags from "../components/common/PlaylistTags";
 import type { Video } from "../types/video";
 
 // 1. 통합 데이터 가져오기
@@ -22,6 +23,7 @@ function Home() {
       author: v.author,
       duration: v.duration,
       thumbnail,
+      youtube_id: v.youtube_id,
       playlist_id: v.playlist_id,
     });
   };
@@ -43,10 +45,12 @@ function Home() {
             <ContentContainer>
               <h2
                 className="page-title"
-                style={{ fontSize: "1.5rem", marginBottom: "16px" }}
+                style={{ fontSize: "1.5rem", marginBottom: "8px" }}
               >
                 {playlist.title}
               </h2>
+              
+              <PlaylistTags playlist={playlist} />
             </ContentContainer>
 
             <div style={{ padding: "0 20px" }}>
