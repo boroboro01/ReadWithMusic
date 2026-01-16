@@ -28,8 +28,6 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 8px;
-  margin-bottom: 16px;
 }
 
 .playlist-tag {
