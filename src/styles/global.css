@@ -59,8 +59,8 @@ body {
 }
 
 .tag-filter-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 24px;
+  font-weight: 500;
   color: #e6e6e6;
 }
 
@@ -102,13 +102,34 @@ body {
 }
 
 .filter-tag:hover {
-  background: rgba(79, 70, 229, 0.2);
-  color: #a78bfa;
-  border-color: rgba(79, 70, 229, 0.4);
+  background: rgba(255, 193, 7, 0.2);
+  color: #fbbf24;
+  border-color: rgba(255, 193, 7, 0.4);
 }
 
 .filter-tag.active {
-  background: rgba(79, 70, 229, 0.3);
-  color: #a78bfa;
-  border-color: rgba(79, 70, 229, 0.6);
+  background: rgba(245, 158, 11, 0.3);
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.6);
+}
+
+/* ======================
+   Tag Categories
+   ====================== */
+
+.tag-category {
+  margin-bottom: 20px;
+}
+
+.tag-category:last-child {
+  margin-bottom: 0;
+}
+
+.tag-category-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #d1d5db;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }

@@ -16,22 +16,34 @@ function Home() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  // 모든 태그 추출
-  const allTags = useMemo(() => {
-    const tags = new Set<string>();
-    
-    videoData.playlists.forEach(playlist => {
+  // 카테고리별 태그 추출
+  const tagCategories = useMemo(() => {
+    const moodTags = new Set<string>();
+    const eraTags = new Set<string>();
+    const countryTags = new Set<string>();
+
+    videoData.playlists.forEach((playlist) => {
       const parseTags = (tagString: string): string[] => {
-        if (!tagString || tagString.trim() === '') return [];
-        return tagString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+        if (!tagString || tagString.trim() === "") return [];
+        return tagString
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag.length > 0);
       };
-      
-      [...parseTags(playlist.country || ''), 
-       ...parseTags(playlist.era || ''), 
-       ...parseTags(playlist.mood || '')].forEach(tag => tags.add(tag));
+
+      // 분위기 태그
+      parseTags(playlist.mood || "").forEach((tag) => moodTags.add(tag));
+      // 시대 태그
+      parseTags(playlist.era || "").forEach((tag) => eraTags.add(tag));
+      // 국가 태그
+      parseTags(playlist.country || "").forEach((tag) => countryTags.add(tag));
     });
-    
-    return Array.from(tags).sort();
+
+    return [
+      { title: "분위기", tags: Array.from(moodTags).sort() },
+      { title: "시대", tags: Array.from(eraTags).sort() },
+      { title: "국가", tags: Array.from(countryTags).sort() },
+    ];
   }, []);
 
   // 태그 필터링된 플레이리스트
@@ -40,26 +52,31 @@ function Home() {
       return videoData.playlists;
     }
 
-    return videoData.playlists.filter(playlist => {
+    return videoData.playlists.filter((playlist) => {
       const parseTags = (tagString: string): string[] => {
-        if (!tagString || tagString.trim() === '') return [];
-        return tagString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+        if (!tagString || tagString.trim() === "") return [];
+        return tagString
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag.length > 0);
       };
-      
+
       const playlistTags = [
-        ...parseTags(playlist.country || ''), 
-        ...parseTags(playlist.era || ''), 
-        ...parseTags(playlist.mood || '')
+        ...parseTags(playlist.country || ""),
+        ...parseTags(playlist.era || ""),
+        ...parseTags(playlist.mood || ""),
       ];
-      
-      return selectedTags.some(selectedTag => playlistTags.includes(selectedTag));
+
+      return selectedTags.some((selectedTag) =>
+        playlistTags.includes(selectedTag)
+      );
     });
   }, [selectedTags]);
 
   const handleTagToggle = (tag: string) => {
-    setSelectedTags(prev => {
+    setSelectedTags((prev) => {
       if (prev.includes(tag)) {
-        return prev.filter(t => t !== tag);
+        return prev.filter((t) => t !== tag);
       } else {
         return [...prev, tag];
       }
@@ -110,8 +127,8 @@ function Home() {
 
       {/* 태그 필터 UI */}
       <ContentContainer>
-        <TagFilter 
-          allTags={allTags}
+        <TagFilter
+          categories={tagCategories}
           selectedTags={selectedTags}
           onTagToggle={handleTagToggle}
           onClearAll={handleClearAllTags}
