@@ -11,11 +11,29 @@
   overflow-x: auto;
   padding: 0 0 8px 60px; /* 좌측에 60px 패딩 추가 */
   scrollbar-width: none;
+
+  /* 좌우 끝에 페이드 마스크 적용 */
+  mask: linear-gradient(
+    to right,
+    transparent 0px,
+    black 60px,
+    black calc(100% - 72px),
+    transparent 100%
+  );
+  -webkit-mask: linear-gradient(
+    to right,
+    transparent 0px,
+    black 60px,
+    black calc(100% - 72px),
+    transparent 100%
+  );
 }
 
 .horizontal-scroll::-webkit-scrollbar {
   display: none;
 }
+
+/* 기존 intersection observer 스타일 제거 */
 
 /* 디즈니 플러스 스타일 네비게이션 */
 .scroll-nav {
