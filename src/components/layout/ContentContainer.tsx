@@ -7,7 +7,7 @@ function ContentContainer({ children }: Props) {
     <div
       style={{
         margin: "0 auto",
-        padding: "20px 20px",
+        padding: "0px 0px 12px 60px",
       }}
     >
       {children}

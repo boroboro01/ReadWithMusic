@@ -162,7 +162,7 @@ function Home() {
         if (filteredVideos.length === 0) return null;
 
         return (
-          <section key={playlist.id} style={{ marginBottom: "40px" }}>
+          <section key={playlist.id} style={{ marginBottom: "20px" }}>
             <ContentContainer>
               <h2
                 className="page-title"
@@ -177,7 +177,7 @@ function Home() {
               />
             </ContentContainer>
 
-            <div style={{ padding: "0 20px" }}>
+            <ContentContainer>
               <HorizontalList>
                 {filteredVideos.map((v) => (
                   <VideoCard
@@ -191,7 +191,7 @@ function Home() {
                   />
                 ))}
               </HorizontalList>
-            </div>
+            </ContentContainer>
           </section>
         );
       })}
