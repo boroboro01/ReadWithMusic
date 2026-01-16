@@ -62,11 +62,11 @@ function HorizontalList({ children }: Props) {
   }, [children, isHovering]); // isHovering 상태도 의존성에 추가
 
   const scrollLeft = () => {
-    scrollRef.current?.scrollBy({ left: -240, behavior: "smooth" });
+    scrollRef.current?.scrollBy({ left: -592, behavior: "smooth" }); // 약 2개 카드 분량 (296px * 2)
   };
 
   const scrollRight = () => {
-    scrollRef.current?.scrollBy({ left: 240, behavior: "smooth" });
+    scrollRef.current?.scrollBy({ left: 592, behavior: "smooth" }); // 약 2개 카드 분량 (296px * 2)
   };
 
   return (
