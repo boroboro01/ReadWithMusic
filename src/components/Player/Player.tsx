@@ -22,8 +22,6 @@ const Player: React.FC<Props> = ({ selectedVideo }) => {
   const [pendingPlay, setPendingPlay] = useState(false);
   const [volume, setVolume] = useState<number>(60);
   const [muted, setMuted] = useState<boolean>(false);
-  // lastVolume은 볼륨 슬라이더 로직에서 쓰이므로 유지 (사용 중임)
-  const [lastVolume, setLastVolume] = useState<number>(60);
   const playerRef = useRef<any>(null);
 
   useEffect(() => {
@@ -100,8 +98,6 @@ const Player: React.FC<Props> = ({ selectedVideo }) => {
     else playerRef.current.playVideo();
   };
 
-  // toggleMute 함수 삭제함
-
   const onVolumeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
     const v = Math.max(0, Math.min(100, Number(e.target.value)));
@@ -115,7 +111,6 @@ const Player: React.FC<Props> = ({ selectedVideo }) => {
       playerRef.current?.unMute?.();
       setMuted(false);
     }
-    if (v > 0) setLastVolume(v);
   };
 
   useEffect(() => {

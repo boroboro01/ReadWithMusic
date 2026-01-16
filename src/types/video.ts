@@ -4,8 +4,7 @@ export interface Video {
   author: string;
   duration: string;
   thumbnail: string;
-  youtube_id: string;
-  playlist_id: string;
+  playlist_id: string; // Changed from playlistIds to playlistId to match JSON
 }
 
 export interface Playlist {
@@ -14,5 +13,5 @@ export interface Playlist {
   country?: string;
   era?: string;
   mood?: string;
-  target_books?: string;
+  targetBooks?: string;
 }
