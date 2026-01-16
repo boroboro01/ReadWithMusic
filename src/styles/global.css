@@ -42,3 +42,73 @@ body {
   line-height: 1.2;
   white-space: nowrap;
 }
+
+/* ======================
+   Tag Filter
+   ====================== */
+
+.tag-filter {
+  margin-bottom: 32px;
+}
+
+.tag-filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.tag-filter-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e6e6e6;
+}
+
+.clear-all-btn {
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  background: transparent;
+  color: #9ca3af;
+  border: 1px solid #4a4a4a;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-all-btn:hover {
+  background: rgba(156, 163, 175, 0.1);
+  color: #e5e7eb;
+}
+
+.tag-filter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-tag {
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  background: rgba(55, 55, 55, 0.8);
+  color: #c5c5c5;
+  border: 1px solid rgba(100, 100, 100, 0.3);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.filter-tag:hover {
+  background: rgba(79, 70, 229, 0.2);
+  color: #a78bfa;
+  border-color: rgba(79, 70, 229, 0.4);
+}
+
+.filter-tag.active {
+  background: rgba(79, 70, 229, 0.3);
+  color: #a78bfa;
+  border-color: rgba(79, 70, 229, 0.6);
+}

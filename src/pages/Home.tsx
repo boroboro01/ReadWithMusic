@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import MainLayout from "../components/layout/MainLayout";
 import ContentContainer from "../components/layout/ContentContainer";
 import HorizontalList from "../components/list/HorizontalList";
 import VideoCard from "../components/card/VideoCard";
 import Player from "../components/Player/Player";
 import PlaylistTags from "../components/common/PlaylistTags";
+import TagFilter from "../components/common/TagFilter";
 import type { Video } from "../types/video";
 import logo from "../assets/logo.png";
 
@@ -13,6 +14,61 @@ import videoData from "../data/videoData.json";
 
 function Home() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  // 모든 태그 추출
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    
+    videoData.playlists.forEach(playlist => {
+      const parseTags = (tagString: string): string[] => {
+        if (!tagString || tagString.trim() === '') return [];
+        return tagString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+      };
+      
+      [...parseTags(playlist.country || ''), 
+       ...parseTags(playlist.era || ''), 
+       ...parseTags(playlist.mood || '')].forEach(tag => tags.add(tag));
+    });
+    
+    return Array.from(tags).sort();
+  }, []);
+
+  // 태그 필터링된 플레이리스트
+  const filteredPlaylists = useMemo(() => {
+    if (selectedTags.length === 0) {
+      return videoData.playlists;
+    }
+
+    return videoData.playlists.filter(playlist => {
+      const parseTags = (tagString: string): string[] => {
+        if (!tagString || tagString.trim() === '') return [];
+        return tagString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+      };
+      
+      const playlistTags = [
+        ...parseTags(playlist.country || ''), 
+        ...parseTags(playlist.era || ''), 
+        ...parseTags(playlist.mood || '')
+      ];
+      
+      return selectedTags.some(selectedTag => playlistTags.includes(selectedTag));
+    });
+  }, [selectedTags]);
+
+  const handleTagToggle = (tag: string) => {
+    setSelectedTags(prev => {
+      if (prev.includes(tag)) {
+        return prev.filter(t => t !== tag);
+      } else {
+        return [...prev, tag];
+      }
+    });
+  };
+
+  const handleClearAllTags = () => {
+    setSelectedTags([]);
+  };
 
   const handleSelect = (v: any) => {
     const youtubeId = v.youtube_id;
@@ -52,8 +108,18 @@ function Home() {
         />
       </header>
 
-      {/* 2. 모든 플레이리스트를 순회하며 렌더링 */}
-      {videoData.playlists.map((playlist) => {
+      {/* 태그 필터 UI */}
+      <ContentContainer>
+        <TagFilter 
+          allTags={allTags}
+          selectedTags={selectedTags}
+          onTagToggle={handleTagToggle}
+          onClearAll={handleClearAllTags}
+        />
+      </ContentContainer>
+
+      {/* 2. 필터링된 플레이리스트 렌더링 */}
+      {filteredPlaylists.map((playlist) => {
         // 해당 플리에 속한 영상들만 필터링
         const filteredVideos = videoData.videos.filter(
           (v) => v.playlist_id === playlist.id
