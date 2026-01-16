@@ -1,5 +1,9 @@
 .horizontal-wrapper {
   position: relative;
+  /* ContentContainer의 좌측 패딩(60px)을 상쇄하여 화면 끝까지 확장 */
+  margin-left: -60px;
+  overflow: visible; /* 확대된 썸네일이 잘리지 않도록 */
+  padding-top: 8px; /* 썸네일 확대를 위한 최소 상단 여백 */
 }
 
 /* 스크롤 영역 */
@@ -7,24 +11,46 @@
   display: flex;
   gap: 16px;
   overflow-x: auto;
-  padding-bottom: 8px;
+  overflow-y: visible; /* 수직 방향으로는 넘치는 것을 허용 */
+  padding: 5px 60px 8px 60px; /* 상단 패딩을 5px로 줄임 */
   scrollbar-width: none;
+
+  /* 좌우 끝에 페이드 마스크 적용 */
+  mask: linear-gradient(
+    to right,
+    transparent 0px,
+    black 60px,
+    black calc(100% - 72px),
+    transparent 100%
+  );
+  -webkit-mask: linear-gradient(
+    to right,
+    transparent 0px,
+    black 60px,
+    black calc(100% - 72px),
+    transparent 100%
+  );
 }
 
 .horizontal-scroll::-webkit-scrollbar {
   display: none;
 }
 
+/* 기존 intersection observer 스타일 제거 */
+
 /* 디즈니 플러스 스타일 네비게이션 */
 .scroll-nav {
   position: absolute;
   top: 0;
-  bottom: 0;
+  bottom: 0; /* 전체 높이로 확장 */
   width: 72px;
 
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* 상단 정렬로 변경 */
   justify-content: center;
+  padding-top: calc(
+    8px + 5px + 280px * 9 / 16 / 2 - 16px
+  ); /* wrapper(8px) + scroll(5px) + 썸네일 중앙 - 아이콘 절반 */
 
   opacity: 0;
   pointer-events: none;
@@ -43,7 +69,7 @@
 
 /* 좌측 */
 .scroll-nav.left {
-  left: 0;
+  left: 0; /* 화면 끝에 붙음 */
   background: linear-gradient(
     to right,
     rgba(52, 52, 52, 0.85),

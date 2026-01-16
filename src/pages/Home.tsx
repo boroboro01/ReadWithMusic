@@ -129,7 +129,7 @@ function Home() {
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-start",
-          padding: "12px 0 12px 20px",
+          padding: "24px 0px 24px 60px",
           marginBottom: "40px",
           backgroundColor: "#191919",
         }}
@@ -138,9 +138,8 @@ function Home() {
           src={logo}
           alt="독서 모드 로고"
           style={{
-            height: "80px",
+            height: "36px",
             width: "auto",
-            marginBottom: "24px",
           }}
         />
       </header>
@@ -162,7 +161,7 @@ function Home() {
         if (filteredVideos.length === 0) return null;
 
         return (
-          <section key={playlist.id} style={{ marginBottom: "40px" }}>
+          <section key={playlist.id} style={{ marginBottom: "20px" }}>
             <ContentContainer>
               <h2
                 className="page-title"
@@ -177,7 +176,7 @@ function Home() {
               />
             </ContentContainer>
 
-            <div style={{ padding: "0 20px" }}>
+            <ContentContainer>
               <HorizontalList>
                 {filteredVideos.map((v) => (
                   <VideoCard
@@ -191,7 +190,7 @@ function Home() {
                   />
                 ))}
               </HorizontalList>
-            </div>
+            </ContentContainer>
           </section>
         );
       })}

@@ -5,6 +5,7 @@
   display: flex;
   flex-direction: column;
   cursor: pointer;
+  overflow: visible; /* 확대된 썸네일이 카드 영역을 벗어날 수 있도록 */
 }
 
 /* ======================
@@ -17,6 +18,17 @@
   border-radius: 10px;
   overflow: hidden;
   background-color: #1f1f1f;
+  position: relative;
+  transition: transform 0.4s ease; /* border transition 제거 */
+  transform-origin: center center; /* 중앙을 기준으로 확대 */
+}
+
+/* 썸네일 호버 시에만 확대 */
+.video-thumbnail:hover {
+  transform: scale(1.05);
+  border: 2px solid #ffffff;
+  z-index: 20; /* 다른 요소들 위에 표시 */
+  position: relative;
 }
 
 .video-thumbnail img {
@@ -73,6 +85,13 @@
 .video-duration {
   font-size: 12px;
   color: #9ca3af;
+  transition: color 0.4s ease;
+}
+
+/* 텍스트만 호버 또는 썸네일 호버 시 텍스트 밝아짐 */
+.video-meta:hover .video-duration,
+.video-thumbnail:hover ~ .video-meta .video-duration {
+  color: #d1d5db; /* 더 밝은 회색 */
 }
 
 /* Title (max 2 lines) */
@@ -82,11 +101,19 @@
   font-size: 15px;
   font-weight: 500;
   line-height: 1.4;
+  color: #c2c2c2; /* 기본 색상을 더 어둡게 설정 */
 
-  display: -webkit-box;
+  display: -webkit- box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  transition: color 0.6s ease;
+}
+
+/* 텍스트만 호버 또는 썸네일 호버 시 텍스트 밝아짐 */
+.video-meta:hover .video-title,
+.video-thumbnail:hover ~ .video-meta .video-title {
+  color: #ffffff; /* 밝은 흰색 */
 }
 
 /* Author */
@@ -95,8 +122,15 @@
   margin-top: 2px;
   font-size: 13px;
   color: #9ca3af;
+  transition: color 0.6s ease;
 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* 텍스트만 호버 또는 썸네일 호버 시 텍스트 밝아짐 */
+.video-meta:hover .video-author,
+.video-thumbnail:hover ~ .video-meta .video-author {
+  color: #d1d5db; /* 더 밝은 회색 */
 }

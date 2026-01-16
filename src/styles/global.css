@@ -48,13 +48,13 @@ body {
    ====================== */
 
 .tag-filter {
-  margin-bottom: 32px;
+  margin-bottom: 60px;
 }
 
 .tag-filter-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px; /* 제목과 버튼 사이 간격 */
   margin-bottom: 12px;
 }
 
