@@ -7,8 +7,10 @@ import VideoCard from "../components/card/VideoCard";
 import Player from "../components/Player/Player";
 import PlaylistTags from "../components/common/PlaylistTags";
 import TagFilter from "../components/common/TagFilter";
+import IntroSection from "../components/common/IntroSection";
 import type { Video } from "../types/video";
 import logo from "../assets/logo.png";
+import "../styles/intro.css";
 
 // 인터페이스 정의 (Supabase 데이터 구조와 일치)
 interface Playlist {
@@ -130,8 +132,7 @@ function Home() {
           flexDirection: "column",
           alignItems: "flex-start",
           padding: "24px 0px 24px 60px",
-          marginBottom: "40px",
-          backgroundColor: "#191919",
+          backgroundColor: "rgba(0, 0, 0, 0.7)",
         }}
       >
         <img
@@ -143,6 +144,8 @@ function Home() {
           }}
         />
       </header>
+
+      <IntroSection />
 
       <ContentContainer>
         <TagFilter
