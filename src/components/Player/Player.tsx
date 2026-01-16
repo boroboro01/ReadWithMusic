@@ -12,19 +12,20 @@ import {
 
 type Props = {
   selectedVideo: Video | null;
-  onClose?: () => void; // optional: parent may clear selection
+  // onClose 제거
 };
 
-const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
+// props에서 onClose 제거
+const Player: React.FC<Props> = ({ selectedVideo }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [pendingPlay, setPendingPlay] = useState(false);
   const [volume, setVolume] = useState<number>(60);
   const [muted, setMuted] = useState<boolean>(false);
+  // lastVolume은 볼륨 슬라이더 로직에서 쓰이므로 유지 (사용 중임)
   const [lastVolume, setLastVolume] = useState<number>(60);
   const playerRef = useRef<any>(null);
 
-  // Spacebar toggles play/pause when a video is selected and no input is focused
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.code !== "Space") return;
@@ -35,12 +36,11 @@ const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
           active.tagName === "TEXTAREA" ||
           active.isContentEditable)
       ) {
-        return; // ignore when typing in inputs
+        return;
       }
       if (!selectedVideo) return;
       e.preventDefault();
       if (!playerRef.current) {
-        // expand player and request play
         setPendingPlay(true);
         setIsExpanded(true);
         return;
@@ -53,14 +53,9 @@ const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [selectedVideo, isPlaying]);
 
-  // When a new video is selected, show the mini view (not expanded)
   useEffect(() => {
     if (selectedVideo) {
-      // 1. 영상이 바뀌면 미니 플레이어 상태는 유지하되
-      // 2. 새로운 영상이 왔으므로 바로 재생되게끔 pendingPlay를 true로 설정
       setPendingPlay(true);
-
-      // playerRef가 이미 있다면 바로 playVideo를 시도합니다.
       if (playerRef.current && playerRef.current.loadVideoById) {
         playerRef.current.loadVideoById(selectedVideo.id);
         playerRef.current.playVideo();
@@ -77,35 +72,26 @@ const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
       }
       if (muted && playerRef.current?.mute) playerRef.current.mute();
       else if (!muted && playerRef.current?.unMute) playerRef.current.unMute();
-    } catch (e) {
-      // noop
-    }
+    } catch (e) {}
+
     if (pendingPlay && playerRef.current && playerRef.current.playVideo) {
       try {
-        // attempt to play (autoplay may be allowed depending on browser/user gesture)
-        try {
-          playerRef.current.playVideo();
-          setIsPlaying(true);
-        } catch (e) {
-          // noop
-        }
-      } catch (e) {
-        // noop
-      }
+        playerRef.current.playVideo();
+        setIsPlaying(true);
+      } catch (e) {}
       setPendingPlay(false);
     }
   };
 
   const onStateChange: YouTubeProps["onStateChange"] = (event) => {
     const state = event.data;
-    if (state === 1) setIsPlaying(true); // playing
-    if (state === 2 || state === 0) setIsPlaying(false); // paused or ended
+    if (state === 1) setIsPlaying(true);
+    if (state === 2 || state === 0) setIsPlaying(false);
   };
 
   const togglePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!playerRef.current) {
-      // Player not mounted yet: expand and request play when ready
       setPendingPlay(true);
       setIsExpanded(true);
       return;
@@ -114,20 +100,7 @@ const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
     else playerRef.current.playVideo();
   };
 
-  const toggleMute = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!playerRef.current) return;
-    if (muted) {
-      playerRef.current.unMute?.();
-      if (lastVolume != null) playerRef.current.setVolume?.(lastVolume);
-      setMuted(false);
-    } else {
-      // remember current volume before muting
-      setLastVolume(volume);
-      playerRef.current.mute?.();
-      setMuted(true);
-    }
-  };
+  // toggleMute 함수 삭제함
 
   const onVolumeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
@@ -139,14 +112,12 @@ const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
       } catch {}
     }
     if (muted && v > 0) {
-      // unmute when user drags slider up
       playerRef.current?.unMute?.();
       setMuted(false);
     }
     if (v > 0) setLastVolume(v);
   };
 
-  // Keep player volume/mute in sync when state changes (safety net)
   useEffect(() => {
     if (!playerRef.current) return;
     try {
@@ -157,7 +128,6 @@ const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
   }, [volume, muted]);
 
   if (!selectedVideo) {
-    // render invisible container to allow CSS to hide/show consistently
     return <div className="player-container hidden" />;
   }
 
@@ -168,7 +138,6 @@ const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
         if (!isExpanded) setIsExpanded(true);
       }}
     >
-      {/* Mini bar (always rendered; visually visible when translated up) */}
       <div
         className="mini-bar"
         onClick={(e) => {
@@ -182,11 +151,7 @@ const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
           <div className="author">{selectedVideo.author}</div>
         </div>
         <div className="mini-right">
-          <div
-            className="mini-controls"
-            onClick={(e) => e.stopPropagation()}
-            aria-label="Volume controls"
-          >
+          <div className="mini-controls" onClick={(e) => e.stopPropagation()}>
             <FontAwesomeIcon
               className="volume-icon"
               icon={
@@ -204,24 +169,16 @@ const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
               max={100}
               value={muted ? 0 : volume}
               onChange={onVolumeInput}
-              aria-label="Volume"
             />
           </div>
-          <button
-            className="play-btn"
-            onClick={togglePlay}
-            aria-label={isPlaying ? "Pause" : "Play"}
-          >
+          <button className="play-btn" onClick={togglePlay}>
             {isPlaying ? "❚❚" : "▶"}
           </button>
         </div>
       </div>
 
-      {/* Expanded full player content */}
       <div className="player-full" onClick={(e) => e.stopPropagation()}>
-        {/* top handle: visual area only (does not collapse) */}
         <div className="collapse-handle" aria-hidden />
-
         <div className="player-header">
           <div className="video-info">
             <h3 className="full-title">{selectedVideo.title}</h3>
@@ -229,10 +186,7 @@ const Player: React.FC<Props> = ({ selectedVideo, onClose }) => {
               {selectedVideo.author} • {selectedVideo.duration}
             </div>
           </div>
-          <div style={{ marginLeft: "auto" }} />
         </div>
-
-        {/* Volume controls moved to mini bar */}
 
         <div className="youtube-wrapper">
           <YouTube

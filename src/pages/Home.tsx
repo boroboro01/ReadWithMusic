@@ -91,10 +91,7 @@ function Home() {
         );
       })}
 
-      <Player
-        selectedVideo={selectedVideo}
-        onClose={() => setSelectedVideo(null)}
-      />
+      <Player selectedVideo={selectedVideo} />
     </MainLayout>
   );
 }
