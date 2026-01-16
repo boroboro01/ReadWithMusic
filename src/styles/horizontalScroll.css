@@ -48,7 +48,9 @@
   display: flex;
   align-items: flex-start; /* 상단 정렬로 변경 */
   justify-content: center;
-  padding-top: calc(280px * 9 / 16 / 2 - 16px); /* 썸네일 중앙에 아이콘 위치 */
+  padding-top: calc(
+    8px + 5px + 280px * 9 / 16 / 2 - 16px
+  ); /* wrapper(8px) + scroll(5px) + 썸네일 중앙 - 아이콘 절반 */
 
   opacity: 0;
   pointer-events: none;

@@ -129,7 +129,7 @@ function Home() {
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-start",
-          padding: "12px 0 12px 20px",
+          padding: "24px 0px 24px 60px",
           marginBottom: "40px",
           backgroundColor: "#191919",
         }}
@@ -138,9 +138,8 @@ function Home() {
           src={logo}
           alt="독서 모드 로고"
           style={{
-            height: "80px",
+            height: "36px",
             width: "auto",
-            marginBottom: "24px",
           }}
         />
       </header>

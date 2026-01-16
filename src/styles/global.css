@@ -54,7 +54,7 @@ body {
 .tag-filter-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px; /* 제목과 버튼 사이 간격 */
   margin-bottom: 12px;
 }
 
