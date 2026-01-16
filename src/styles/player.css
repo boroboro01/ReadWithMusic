@@ -1,0 +1,230 @@
+/* Container is full viewport height but translated down to show mini bar */
+.player-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100vh; /* full height container; we control visible area with translateY */
+  z-index: 9999;
+  overflow: hidden;
+  transition: transform 0.4s ease-in-out;
+  will-change: transform;
+  background: #191919;
+  color: #f9fafb;
+}
+
+/* Hidden fully off-screen */
+.player-container.hidden {
+  transform: translateY(100%);
+}
+
+/* Mini view: translate so only 70px bar shows */
+.player-container.mini {
+  transform: translateY(calc(100% - 70px));
+}
+
+/* Expanded: fill the screen */
+.player-container.expanded {
+  transform: translateY(0);
+}
+
+/* Mini bar styling */
+.mini-bar {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #151515;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+}
+
+.mini-bar .thumb {
+  width: 94px;
+  height: 53px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.mini-bar .meta {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mini-bar .title {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.mini-bar .author {
+  font-size: 12px;
+  color: #cfcfcf;
+}
+
+.play-btn {
+  background: transparent;
+  color: #f9fafb;
+  border: none;
+  font-size: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.volume-btn {
+  margin-left: 6px;
+  background: transparent;
+  color: #f9fafb;
+  border: none;
+  font-size: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Full player area */
+.player-full {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  align-items: center; /* center content horizontally */
+}
+
+/* ensure the full player is a positioned container for the top handle */
+.player-full {
+  position: relative;
+}
+
+/* A clickable area at the top of the expanded player to collapse it */
+.collapse-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  z-index: 1001;
+  /* visually subtle: slight gradient so users perceive the area */
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0));
+}
+
+.mini-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mini-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+}
+
+.close-btn {
+  background: transparent;
+  color: #f9fafb;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.video-info .full-title {
+  margin: 0;
+  font-size: 18px;
+}
+
+.video-info .full-sub {
+  font-size: 13px;
+  color: #f9fafb;
+}
+
+.youtube-wrapper {
+  position: relative;
+  width: 100%; /* 기본적으로 가로를 채우되 */
+  max-width: 1000px; /* PC에서도 이 너비 이상은 안 커지게 */
+  aspect-ratio: 16 / 9; /* 가로 세로 비율 고정 */
+  max-height: 60vh; /* 세로가 화면의 60%를 넘지 않게 제한 */
+  margin: 20px auto; /* 중앙 정렬 */
+  background: #333;
+}
+
+.player-controls {
+  display: none;
+}
+
+.volume-icon {
+  font-size: 16px;
+  color: #e5e7eb;
+  opacity: 0.9;
+}
+
+.volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  width: 160px;
+  border-radius: 999px;
+  background: #3a3a3a;
+  outline: none;
+}
+
+/* Slightly narrower slider inside the mini bar for space */
+.mini-controls .volume-slider {
+  width: 120px;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #f9fafb;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #f9fafb;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 내부 iframe이 위에서 제한한 영역을 꽉 채우게 함 */
+.youtube-wrapper iframe,
+.youtube-wrapper > div {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* small responsive tweaks */
+@media (max-width: 640px) {
+  .mini-bar .thumb {
+    width: 120px;
+    height: 68px;
+  }
+  .mini-bar .title {
+    font-size: 13px;
+  }
+}

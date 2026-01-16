@@ -1,0 +1,70 @@
+.horizontal-wrapper {
+  position: relative;
+}
+
+/* 스크롤 영역 */
+.horizontal-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* 디즈니 플러스 스타일 네비게이션 */
+.scroll-nav {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 72px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  border: none;
+  background: none;
+  z-index: 10;
+}
+
+/* hover 시만 등장 */
+.horizontal-wrapper:hover .scroll-nav {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* 좌측 */
+.scroll-nav.left {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    rgba(52, 52, 52, 0.85),
+    rgba(52, 52, 52, 0)
+  );
+}
+
+/* 우측 */
+.scroll-nav.right {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    rgba(52, 52, 52, 0.85),
+    rgba(52, 52, 52, 0)
+  );
+}
+
+/* 화살표 아이콘 */
+.scroll-nav svg {
+  width: 32px;
+  height: 32px;
+  stroke: #ffffff;
+  stroke-width: 2.5;
+}
