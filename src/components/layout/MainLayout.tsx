@@ -6,7 +6,7 @@ function MainLayout({ children }: Props) {
   return (
     <div
       style={{
-        backgroundColor: "#343434",
+        backgroundColor: "#0f0f0f",
         minHeight: "100vh",
       }}
     >
