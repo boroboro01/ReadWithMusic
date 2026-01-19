@@ -27,6 +27,8 @@ function Home() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isPlayerExpanded, setIsPlayerExpanded] = useState(false); // 플레이어 확장 상태 관리
+  const [showTooltip, setShowTooltip] = useState(true); // 툴팁 상태 관리 - 기본적으로 표시
+  const [hasHovered, setHasHovered] = useState(false); // 한 번이라도 호버했는지 여부
 
   // 1. Supabase에서 받아올 상태값 설정
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
@@ -275,9 +277,10 @@ function Home() {
       <header
         style={{
           display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          padding: "24px 0px 24px 60px",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "24px 60px",
           backgroundColor: "rgba(0, 0, 0, 0.7)",
         }}
       >
@@ -289,6 +292,74 @@ function Home() {
             width: "auto",
           }}
         />
+        <div style={{ position: "relative" }}>
+          <button
+            style={{
+              padding: "8px 16px",
+              backgroundColor: "transparent",
+              border: "1px solid #374151",
+              borderRadius: "6px",
+              color: "#e5e7eb",
+              fontSize: "14px",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              const target = e.target as HTMLElement;
+              target.style.backgroundColor = "#374151";
+              target.style.borderColor = "#6b7280";
+            }}
+            onMouseLeave={(e) => {
+              const target = e.target as HTMLElement;
+              target.style.backgroundColor = "transparent";
+              target.style.borderColor = "#374151";
+              if (!hasHovered) {
+                setHasHovered(true);
+                setShowTooltip(false);
+              }
+            }}
+            onClick={() => {
+              // 의견 남기기 기능 추가 예정
+              alert("의견 남기기 기능이 곧 추가될 예정입니다!");
+            }}
+          >
+            의견 남기기
+          </button>
+          {showTooltip && !hasHovered && (
+            <div
+              style={{
+                position: "absolute",
+                top: "calc(100% + 8px)",
+                right: "0",
+                backgroundColor: "#111111",
+                color: "white",
+                padding: "8px 12px",
+                borderRadius: "6px",
+                fontSize: "12px",
+                whiteSpace: "nowrap",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                zIndex: 1000,
+                opacity: 1,
+                animation: "fadeIn 0.2s ease",
+                textAlign: "right",
+              }}
+            >
+              의견을 남겨주시면 기프티콘을 드려요 ☺️
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "100%",
+                  right: "12px",
+                  width: 0,
+                  height: 0,
+                  borderLeft: "6px solid transparent",
+                  borderRight: "6px solid transparent",
+                  borderBottom: "6px solid #111111",
+                }}
+              />
+            </div>
+          )}
+        </div>
       </header>
 
       <IntroSection />
@@ -380,6 +451,33 @@ function Home() {
         onPrevious={playPreviousVideo}
         onNext={playNext}
       />
+
+      <footer
+        style={{
+          backgroundColor: "rgba(0, 0, 0, 0.8)",
+          borderTop: "1px solid #374151",
+          padding: "24px 0",
+          marginTop: "80px",
+          textAlign: "center",
+        }}
+      >
+        <div
+          style={{
+            color: "#9ca3af",
+            fontSize: "14px",
+            letterSpacing: "1.5px",
+            lineHeight: "1.6",
+          }}
+        >
+          © 2026 ReadWithMusic. All rights reserved.
+          <br />본 서비스는 YouTube API 가이드라인을 준수하여 운영됩니다.
+          <br />
+          사이트 내 임베딩된 모든 영상의 저작권 및 광고 수익에 대한 권리는 각
+          영상의 원저작자(YouTube 채널 소유자)에게 있습니다.
+          <br />본 서비스는 영상의 직접적인 복제나 다운로드 기능을 제공하지
+          않습니다.
+        </div>
+      </footer>
     </MainLayout>
   );
 }
