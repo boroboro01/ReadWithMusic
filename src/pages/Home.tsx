@@ -193,6 +193,8 @@ function Home() {
       thumbnail: `https://img.youtube.com/vi/${v.youtube_id}/hqdefault.jpg`,
       playlist_id: v.playlist_id,
     });
+    // 처음 영상 클릭 시 플레이어를 확장된 상태로 표시
+    setIsPlayerExpanded(true);
   };
 
   // 다음 영상 재생 함수

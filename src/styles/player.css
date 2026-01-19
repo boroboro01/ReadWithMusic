@@ -183,6 +183,21 @@
   justify-content: center;
   width: 32px;
   height: 32px;
+  transition: all 0.2s ease;
+}
+
+/* 비활성화된 버튼 스타일 */
+.mini-center .play-btn.disabled,
+.mini-center .nav-btn.disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+}
+
+.mini-center .play-btn.disabled:hover,
+.mini-center .nav-btn.disabled:hover {
+  background: transparent;
+  transform: none;
 }
 
 /* 확장/축소 버튼 스타일 */

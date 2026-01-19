@@ -78,14 +78,40 @@ const Player = (props: Props) => {
         try {
           // 내부 에러를 방지하기 위해 try-catch로 감싸고 호출
           playerRef.current.loadVideoById(selectedVideo.id);
-          playerRef.current.playVideo();
-          setIsPlaying(true);
+          // 새로운 영상 로드 시에만 확장 상태에 따라 자동 재생 결정
+          if (isExpanded) {
+            playerRef.current.playVideo();
+            setIsPlaying(true);
+          }
         } catch (error) {
           console.error("YouTube Player load error:", error);
         }
       }
     }
-  }, [selectedVideo?.id]); // id가 바뀔 때만 실행되도록 수정
+  }, [selectedVideo?.id]); // isExpanded 제거 - 비디오 ID 변경 시에만 로드
+
+  // 미니플레이어/확장 상태 변경 시 영상 재생/일시정지 제어
+  useEffect(() => {
+    if (!playerRef.current || !selectedVideo) return;
+
+    try {
+      if (isExpanded) {
+        // 확장 시: 이전에 재생 중이었다면 계속 재생
+        // pendingPlay는 새 영상 로드 시에만 사용하므로 여기서는 isPlaying 상태만 확인
+        if (isPlaying) {
+          playerRef.current.playVideo();
+        }
+      } else {
+        // 축소 시: 재생 중이면 일시정지만 (영상 위치는 유지)
+        if (isPlaying) {
+          playerRef.current.pauseVideo();
+          // 재생 상태는 유지해서 다시 확장할 때 재생을 계속할 수 있도록 함
+        }
+      }
+    } catch (error) {
+      console.error("Player control error:", error);
+    }
+  }, [isExpanded]);
 
   const onReady: YouTubeProps["onReady"] = (event) => {
     playerRef.current = event.target;
@@ -117,9 +143,15 @@ const Player = (props: Props) => {
 
   const togglePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
+
+    // 미니플레이어 상태에서는 재생/일시정지 불가 (유튜브 정책 준수)
+    if (!isExpanded) {
+      onExpandedChange(true); // 대신 플레이어 확장
+      return;
+    }
+
     if (!playerRef.current) {
       setPendingPlay(true);
-      onExpandedChange(true);
       return;
     }
     if (isPlaying) playerRef.current.pauseVideo();
@@ -180,27 +212,45 @@ const Player = (props: Props) => {
         {/* 중앙 재생 컨트롤 */}
         <div className="mini-center">
           <button
-            className="nav-btn prev-btn"
+            className={`nav-btn prev-btn ${!isExpanded ? "disabled" : ""}`}
             onClick={(e) => {
               e.stopPropagation();
+              if (!isExpanded) {
+                onExpandedChange(true);
+                return;
+              }
               if (onPrevious) onPrevious();
             }}
-            title="이전 곡"
+            title={!isExpanded ? "플레이어를 확장하여 사용" : "이전 곡"}
           >
             <FontAwesomeIcon icon={faStepBackward} />
           </button>
 
-          <button className="play-btn" onClick={togglePlay}>
-            {isPlaying ? "❚❚" : "▶"}
+          <button
+            className={`play-btn ${!isExpanded ? "disabled" : ""}`}
+            onClick={togglePlay}
+            title={
+              !isExpanded
+                ? "플레이어를 확장하여 재생"
+                : isPlaying
+                ? "일시정지"
+                : "재생"
+            }
+          >
+            {!isExpanded ? "▶" : isPlaying ? "❚❚" : "▶"}
           </button>
 
           <button
-            className="nav-btn next-btn"
+            className={`nav-btn next-btn ${!isExpanded ? "disabled" : ""}`}
             onClick={(e) => {
               e.stopPropagation();
+              if (!isExpanded) {
+                onExpandedChange(true);
+                return;
+              }
               if (onNext) onNext();
             }}
-            title="다음 곡"
+            title={!isExpanded ? "플레이어를 확장하여 사용" : "다음 곡"}
           >
             <FontAwesomeIcon icon={faStepForward} />
           </button>
