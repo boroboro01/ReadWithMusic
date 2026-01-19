@@ -2,7 +2,6 @@ import React from "react";
 
 interface PlaylistTagsProps {
   genre?: string;
-  era?: string;
   mood?: string;
   conditions?: string;
   music?: string;
@@ -10,7 +9,6 @@ interface PlaylistTagsProps {
 
 const PlaylistTags: React.FC<PlaylistTagsProps> = ({
   genre,
-  era,
   mood,
   conditions,
   music,
@@ -24,18 +22,11 @@ const PlaylistTags: React.FC<PlaylistTagsProps> = ({
   };
 
   const genreTags = parseTags(genre || "");
-  const eraTags = parseTags(era || "");
   const moodTags = parseTags(mood || "");
   const conditionTags = parseTags(conditions || "");
   const musicTags = parseTags(music || "");
 
-  const allTags = [
-    ...genreTags,
-    ...eraTags,
-    ...moodTags,
-    ...conditionTags,
-    ...musicTags,
-  ];
+  const allTags = [...genreTags, ...moodTags, ...conditionTags, ...musicTags];
 
   if (allTags.length === 0) return null;
 

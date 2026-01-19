@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient"; // 추가
 import MainLayout from "../components/layout/MainLayout";
 import ContentContainer from "../components/layout/ContentContainer";
