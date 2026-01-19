@@ -8,7 +8,7 @@ interface TagCategory {
 interface TagFilterProps {
   categories: TagCategory[];
   selectedTags: string[];
-  onTagToggle: (tag: string) => void;
+  onTagToggle: (tag: string, categoryTitle: string) => void;
   onClearAll: () => void;
 }
 
@@ -45,7 +45,7 @@ const TagFilter: React.FC<TagFilterProps> = ({
                   <button
                     key={tag}
                     className={`filter-tag ${isSelected ? "active" : ""}`}
-                    onClick={() => onTagToggle(tag)}
+                    onClick={() => onTagToggle(tag, category.title)}
                   >
                     {tag}
                   </button>
