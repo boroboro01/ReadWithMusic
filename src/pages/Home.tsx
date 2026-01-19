@@ -20,6 +20,7 @@ interface Playlist {
   era: string;
   mood: string;
   conditions: string;
+  music: string;
   target_books: string;
 }
 
@@ -65,6 +66,7 @@ function Home() {
     const eraTags = new Set<string>();
     const genreTags = new Set<string>();
     const conditionTags = new Set<string>();
+    const musicTags = new Set<string>();
 
     const parseTags = (tagString: string): string[] => {
       if (!tagString || tagString.trim() === "") return [];
@@ -79,6 +81,7 @@ function Home() {
       parseTags(pl.era).forEach((t) => eraTags.add(t));
       parseTags(pl.genre).forEach((t) => genreTags.add(t));
       parseTags(pl.conditions || "").forEach((t) => conditionTags.add(t));
+      parseTags(pl.music || "").forEach((t) => musicTags.add(t));
     });
 
     // 시대 태그 커스텀 정렬 (고대 → 중세 → 근대 → 현대 → 미래 순)
@@ -103,6 +106,7 @@ function Home() {
       { title: "시대", tags: sortedEraTags },
       { title: "장르", tags: Array.from(genreTags).sort() },
       { title: "환경", tags: Array.from(conditionTags).sort() },
+      { title: "음악", tags: Array.from(musicTags).sort() },
     ];
   }, [playlists]); // playlists가 바뀔 때만 재계산
 
@@ -117,6 +121,7 @@ function Home() {
         ...(pl.era || "").split(","),
         ...(pl.mood || "").split(","),
         ...(pl.conditions || "").split(","),
+        ...(pl.music || "").split(","),
       ].map((t) => t.trim());
 
       // 선택한 모든 태그가 플레이리스트에 포함되어야 함 (AND 조건)
@@ -133,7 +138,7 @@ function Home() {
           ? prev.filter((t) => t !== tag)
           : [...prev, tag];
       } else {
-        // 시대와 장르는 단일 선택
+        // 시대, 장르, 음악은 단일 선택
         const categoryTags =
           tagCategories.find((cat) => cat.title === categoryTitle)?.tags || [];
 
@@ -243,6 +248,7 @@ function Home() {
                   era={playlist.era}
                   mood={playlist.mood}
                   conditions={playlist.conditions}
+                  music={playlist.music}
                 />
               </ContentContainer>
 

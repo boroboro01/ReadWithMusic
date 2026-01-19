@@ -5,6 +5,7 @@ interface PlaylistTagsProps {
   era?: string;
   mood?: string;
   conditions?: string;
+  music?: string;
 }
 
 const PlaylistTags: React.FC<PlaylistTagsProps> = ({
@@ -12,6 +13,7 @@ const PlaylistTags: React.FC<PlaylistTagsProps> = ({
   era,
   mood,
   conditions,
+  music,
 }) => {
   const parseTags = (tagString: string): string[] => {
     if (!tagString || tagString.trim() === "") return [];
@@ -25,8 +27,15 @@ const PlaylistTags: React.FC<PlaylistTagsProps> = ({
   const eraTags = parseTags(era || "");
   const moodTags = parseTags(mood || "");
   const conditionTags = parseTags(conditions || "");
+  const musicTags = parseTags(music || "");
 
-  const allTags = [...genreTags, ...eraTags, ...moodTags, ...conditionTags];
+  const allTags = [
+    ...genreTags,
+    ...eraTags,
+    ...moodTags,
+    ...conditionTags,
+    ...musicTags,
+  ];
 
   if (allTags.length === 0) return null;
 
