@@ -323,6 +323,11 @@ const Player = (props: Props) => {
             }}
           />
         </div>
+        <div className="policy-notice">
+          본 서비스는 YouTube API 가이드라인을 준수하여 운영됩니다
+          <br />
+          따라서 영상은 확장된 플레이어 상태에서만 재생이 가능합니다
+        </div>
       </div>
     </div>
   );
