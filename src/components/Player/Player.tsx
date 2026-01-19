@@ -8,16 +8,31 @@ import {
   faVolumeHigh,
   faVolumeLow,
   faVolumeXmark,
+  faExpand,
+  faCompress,
+  faStepBackward,
+  faStepForward,
 } from "@fortawesome/free-solid-svg-icons";
 
-type Props = {
+interface Props {
   selectedVideo: Video | null;
-  // onClose 제거
-};
+  onVideoEnd?: () => void;
+  isExpanded: boolean;
+  onExpandedChange: (expanded: boolean) => void;
+  onPrevious?: () => void;
+  onNext?: () => void;
+}
 
-// props에서 onClose 제거
-const Player: React.FC<Props> = ({ selectedVideo }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+const Player = (props: Props) => {
+  const {
+    selectedVideo,
+    onVideoEnd,
+    isExpanded,
+    onExpandedChange,
+    onPrevious,
+    onNext,
+  } = props;
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [pendingPlay, setPendingPlay] = useState(false);
   const [volume, setVolume] = useState<number>(60);
@@ -40,7 +55,7 @@ const Player: React.FC<Props> = ({ selectedVideo }) => {
       e.preventDefault();
       if (!playerRef.current) {
         setPendingPlay(true);
-        setIsExpanded(true);
+        onExpandedChange(true);
         return;
       }
       if (isPlaying) playerRef.current.pauseVideo();
@@ -54,13 +69,23 @@ const Player: React.FC<Props> = ({ selectedVideo }) => {
   useEffect(() => {
     if (selectedVideo) {
       setPendingPlay(true);
-      if (playerRef.current && playerRef.current.loadVideoById) {
-        playerRef.current.loadVideoById(selectedVideo.id);
-        playerRef.current.playVideo();
-        setIsPlaying(true);
+
+      // playerRef.current가 존재하는지, 그리고 로드 함수가 있는지 엄격하게 체크
+      if (
+        playerRef.current &&
+        typeof playerRef.current.loadVideoById === "function"
+      ) {
+        try {
+          // 내부 에러를 방지하기 위해 try-catch로 감싸고 호출
+          playerRef.current.loadVideoById(selectedVideo.id);
+          playerRef.current.playVideo();
+          setIsPlaying(true);
+        } catch (error) {
+          console.error("YouTube Player load error:", error);
+        }
       }
     }
-  }, [selectedVideo]);
+  }, [selectedVideo?.id]); // id가 바뀔 때만 실행되도록 수정
 
   const onReady: YouTubeProps["onReady"] = (event) => {
     playerRef.current = event.target;
@@ -83,15 +108,18 @@ const Player: React.FC<Props> = ({ selectedVideo }) => {
 
   const onStateChange: YouTubeProps["onStateChange"] = (event) => {
     const state = event.data;
+
     if (state === 1) setIsPlaying(true);
-    if (state === 2 || state === 0) setIsPlaying(false);
+    if (state === 2) setIsPlaying(false);
+
+    // 아래에 있던 state === 0 관련 if문과 setTimeout을 통째로 삭제하세요.
   };
 
   const togglePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!playerRef.current) {
       setPendingPlay(true);
-      setIsExpanded(true);
+      onExpandedChange(true);
       return;
     }
     if (isPlaying) playerRef.current.pauseVideo();
@@ -130,14 +158,17 @@ const Player: React.FC<Props> = ({ selectedVideo }) => {
     <div
       className={`player-container visible ${isExpanded ? "expanded" : "mini"}`}
       onClick={() => {
-        if (!isExpanded) setIsExpanded(true);
+        if (!isExpanded) onExpandedChange(true);
       }}
     >
       <div
-        className="mini-bar"
+        className={`mini-bar ${!isExpanded ? "mini-bar-hoverable" : ""}`}
+        title={
+          !isExpanded ? "클릭하여 플레이어 확장" : "클릭하여 플레이어 축소"
+        }
         onClick={(e) => {
           e.stopPropagation();
-          setIsExpanded((prev) => !prev);
+          onExpandedChange(!isExpanded);
         }}
       >
         <img src={selectedVideo.thumbnail} alt="thumb" className="thumb" />
@@ -145,6 +176,36 @@ const Player: React.FC<Props> = ({ selectedVideo }) => {
           <div className="title">{selectedVideo.title}</div>
           <div className="author">{selectedVideo.author}</div>
         </div>
+
+        {/* 중앙 재생 컨트롤 */}
+        <div className="mini-center">
+          <button
+            className="nav-btn prev-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onPrevious) onPrevious();
+            }}
+            title="이전 곡"
+          >
+            <FontAwesomeIcon icon={faStepBackward} />
+          </button>
+
+          <button className="play-btn" onClick={togglePlay}>
+            {isPlaying ? "❚❚" : "▶"}
+          </button>
+
+          <button
+            className="nav-btn next-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onNext) onNext();
+            }}
+            title="다음 곡"
+          >
+            <FontAwesomeIcon icon={faStepForward} />
+          </button>
+        </div>
+
         <div className="mini-right">
           <div className="mini-controls" onClick={(e) => e.stopPropagation()}>
             <FontAwesomeIcon
@@ -166,8 +227,16 @@ const Player: React.FC<Props> = ({ selectedVideo }) => {
               onChange={onVolumeInput}
             />
           </div>
-          <button className="play-btn" onClick={togglePlay}>
-            {isPlaying ? "❚❚" : "▶"}
+          {/* 맨 오른쪽 확장/축소 버튼 */}
+          <button
+            className="expand-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              onExpandedChange(!isExpanded);
+            }}
+            title={isExpanded ? "축소" : "확장"}
+          >
+            <FontAwesomeIcon icon={isExpanded ? faCompress : faExpand} />
           </button>
         </div>
       </div>
@@ -197,6 +266,11 @@ const Player: React.FC<Props> = ({ selectedVideo }) => {
             }}
             onReady={onReady}
             onStateChange={onStateChange}
+            onEnd={() => {
+              if (onVideoEnd) {
+                onVideoEnd(); // Home의 playNextVideo를 여기서 딱 한 번만 호출
+              }
+            }}
           />
         </div>
       </div>
@@ -204,4 +278,4 @@ const Player: React.FC<Props> = ({ selectedVideo }) => {
   );
 };
 
-export default Player;
+export default React.memo(Player);

@@ -32,7 +32,7 @@ const IntroSection: React.FC<IntroSectionProps> = () => {
       <div className="intro-content">
         <h1 className="intro-title">독서 분위기는 음악으로 부터</h1>
         <p className="intro-subtitle">
-          책과 음악이 어우러지는 특별한 공간에 오신 것을 환영합니다.
+          책과 음악이 어우러지는 특별한 공간에 오신 것을 환영합니다
         </p>
       </div>
     </div>
