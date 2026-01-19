@@ -10,6 +10,8 @@ import {
   faVolumeXmark,
   faExpand,
   faCompress,
+  faStepBackward,
+  faStepForward,
 } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
@@ -17,10 +19,19 @@ interface Props {
   onVideoEnd?: () => void;
   isExpanded: boolean;
   onExpandedChange: (expanded: boolean) => void;
+  onPrevious?: () => void;
+  onNext?: () => void;
 }
 
 const Player = (props: Props) => {
-  const { selectedVideo, onVideoEnd, isExpanded, onExpandedChange } = props;
+  const {
+    selectedVideo,
+    onVideoEnd,
+    isExpanded,
+    onExpandedChange,
+    onPrevious,
+    onNext,
+  } = props;
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [pendingPlay, setPendingPlay] = useState(false);
@@ -166,10 +177,32 @@ const Player = (props: Props) => {
           <div className="author">{selectedVideo.author}</div>
         </div>
 
-        {/* 중앙 재생 버튼 */}
+        {/* 중앙 재생 컨트롤 */}
         <div className="mini-center">
+          <button
+            className="nav-btn prev-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onPrevious) onPrevious();
+            }}
+            title="이전 곡"
+          >
+            <FontAwesomeIcon icon={faStepBackward} />
+          </button>
+
           <button className="play-btn" onClick={togglePlay}>
             {isPlaying ? "❚❚" : "▶"}
+          </button>
+
+          <button
+            className="nav-btn next-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onNext) onNext();
+            }}
+            title="다음 곡"
+          >
+            <FontAwesomeIcon icon={faStepForward} />
           </button>
         </div>
 

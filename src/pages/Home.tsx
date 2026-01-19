@@ -227,6 +227,44 @@ function Home() {
     });
   }, [videos]); // videos 데이터가 변경될 때만 함수 갱신
 
+  // 이전 영상 재생 함수
+  const playPreviousVideo = useCallback(() => {
+    setSelectedVideo((current) => {
+      if (!current) return null;
+
+      const currentPlaylistVideos = videos.filter(
+        (v) => v.playlist_id === current.playlist_id
+      );
+
+      if (currentPlaylistVideos.length === 0) return current;
+
+      const currentIndex = currentPlaylistVideos.findIndex(
+        (v) => v.youtube_id === current.id
+      );
+
+      // 이전 인덱스 계산 (첫 번째면 마지막으로)
+      const prevIndex =
+        currentIndex === 0
+          ? currentPlaylistVideos.length - 1
+          : currentIndex - 1;
+      const prevVideo = currentPlaylistVideos[prevIndex];
+
+      return {
+        id: prevVideo.youtube_id,
+        title: prevVideo.title,
+        author: prevVideo.author,
+        duration: prevVideo.duration,
+        thumbnail: `https://img.youtube.com/vi/${prevVideo.youtube_id}/hqdefault.jpg`,
+        playlist_id: prevVideo.playlist_id,
+      };
+    });
+  }, [videos]);
+
+  // 다음 영상 재생 함수 (수동 호출용)
+  const playNext = useCallback(() => {
+    playNextVideo();
+  }, [playNextVideo]);
+
   if (loading)
     return (
       <div style={{ color: "white", padding: "20px" }}>데이터 로딩 중...</div>
@@ -339,6 +377,8 @@ function Home() {
         onVideoEnd={playNextVideo}
         isExpanded={isPlayerExpanded}
         onExpandedChange={setIsPlayerExpanded}
+        onPrevious={playPreviousVideo}
+        onNext={playNext}
       />
     </MainLayout>
   );
