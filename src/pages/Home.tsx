@@ -101,10 +101,37 @@ function Home() {
       return a.localeCompare(b);
     });
 
+    // 분위기 태그 커스텀 정렬 (차분한, 밝은 앞쪽, 공포 맨 뒤)
+    const moodPriorityOrder = ["#차분한", "#밝은"];
+    const moodLastOrder = ["#공포"];
+    const sortedMoodTags = Array.from(moodTags).sort((a, b) => {
+      const priorityA = moodPriorityOrder.indexOf(a);
+      const priorityB = moodPriorityOrder.indexOf(b);
+      const lastA = moodLastOrder.indexOf(a);
+      const lastB = moodLastOrder.indexOf(b);
+
+      // 우선순위 태그들 처리
+      if (priorityA !== -1 && priorityB !== -1) {
+        return priorityA - priorityB;
+      }
+      if (priorityA !== -1) return -1;
+      if (priorityB !== -1) return 1;
+
+      // 마지막 순서 태그들 처리
+      if (lastA !== -1 && lastB !== -1) {
+        return lastA - lastB;
+      }
+      if (lastA !== -1) return 1;
+      if (lastB !== -1) return -1;
+
+      // 나머지는 알파벳 순
+      return a.localeCompare(b);
+    });
+
     return [
-      { title: "분위기", tags: Array.from(moodTags).sort() },
-      { title: "시대", tags: sortedEraTags },
+      { title: "분위기", tags: sortedMoodTags },
       { title: "장르", tags: Array.from(genreTags).sort() },
+      { title: "시대", tags: sortedEraTags },
       { title: "환경", tags: Array.from(conditionTags).sort() },
       { title: "음악", tags: Array.from(musicTags).sort() },
     ];
@@ -130,10 +157,33 @@ function Home() {
   }, [selectedTags, playlists]);
 
   // 나머지 핸들러 (동일)
+  // 분위기 태그 상호 배타 관계 정의
+  const moodExclusiveMap = {
+    "#밝은": ["#어두운", "#공포", "#긴장되는"],
+    "#어두운": ["#밝은"],
+    "#공포": ["#밝은"],
+    "#긴장되는": ["#밝은"],
+    "#차분한": ["#웅장한", "#활기찬"],
+    "#웅장한": ["#차분한"],
+    "#활기찬": ["#차분한"],
+  };
+
   const handleTagToggle = (tag: string, categoryTitle: string) => {
     setSelectedTags((prev) => {
-      if (categoryTitle === "분위기" || categoryTitle === "환경") {
-        // 분위기와 환경은 복수 선택 가능 (기존 로직)
+      if (categoryTitle === "분위기") {
+        // 분위기 태그의 상호 배타 로직
+        if (prev.includes(tag)) {
+          // 태그 해제
+          return prev.filter((t) => t !== tag);
+        } else {
+          // 새 태그 선택 - 상호 배타적인 태그들 제거
+          const excludedTags =
+            moodExclusiveMap[tag as keyof typeof moodExclusiveMap] || [];
+          const filteredPrev = prev.filter((t) => !excludedTags.includes(t));
+          return [...filteredPrev, tag];
+        }
+      } else if (categoryTitle === "환경") {
+        // 환경은 복수 선택 가능 (기존 로직)
         return prev.includes(tag)
           ? prev.filter((t) => t !== tag)
           : [...prev, tag];

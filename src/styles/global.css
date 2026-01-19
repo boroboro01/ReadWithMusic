@@ -113,6 +113,20 @@ body {
   border-color: rgba(245, 158, 11, 0.6);
 }
 
+.filter-tag.disabled {
+  background: rgba(75, 75, 75, 0.3);
+  color: #6b7280;
+  border-color: rgba(107, 114, 128, 0.3);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.filter-tag.disabled:hover {
+  background: rgba(75, 75, 75, 0.3);
+  color: #6b7280;
+  border-color: rgba(107, 114, 128, 0.3);
+}
+
 /* ======================
    Tag Categories
    ====================== */
