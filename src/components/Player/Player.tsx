@@ -10,19 +10,35 @@ import {
   faVolumeXmark,
 } from "@fortawesome/free-solid-svg-icons";
 
-type Props = {
+interface Props {
   selectedVideo: Video | null;
-  // onClose 제거
-};
+  onVideoEnd?: () => void;
+}
 
-// props에서 onClose 제거
-const Player: React.FC<Props> = ({ selectedVideo }) => {
+const Player = (props: Props) => {
+  // 모든 props 로깅
+  console.log("Player component ALL PROPS:", props);
+  console.log("onVideoEnd exists:", "onVideoEnd" in props);
+  console.log("onVideoEnd value:", props.onVideoEnd);
+
+  const { selectedVideo, onVideoEnd } = props;
+
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [pendingPlay, setPendingPlay] = useState(false);
   const [volume, setVolume] = useState<number>(60);
   const [muted, setMuted] = useState<boolean>(false);
   const playerRef = useRef<any>(null);
+
+  // Props 디버깅
+  useEffect(() => {
+    console.log("Player component received props:", {
+      hasSelectedVideo: !!selectedVideo,
+      selectedVideoTitle: selectedVideo?.title,
+      hasOnVideoEnd: !!onVideoEnd,
+      onVideoEndType: typeof onVideoEnd,
+    });
+  }, [selectedVideo, onVideoEnd]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -54,13 +70,23 @@ const Player: React.FC<Props> = ({ selectedVideo }) => {
   useEffect(() => {
     if (selectedVideo) {
       setPendingPlay(true);
-      if (playerRef.current && playerRef.current.loadVideoById) {
-        playerRef.current.loadVideoById(selectedVideo.id);
-        playerRef.current.playVideo();
-        setIsPlaying(true);
+
+      // playerRef.current가 존재하는지, 그리고 로드 함수가 있는지 엄격하게 체크
+      if (
+        playerRef.current &&
+        typeof playerRef.current.loadVideoById === "function"
+      ) {
+        try {
+          // 내부 에러를 방지하기 위해 try-catch로 감싸고 호출
+          playerRef.current.loadVideoById(selectedVideo.id);
+          playerRef.current.playVideo();
+          setIsPlaying(true);
+        } catch (error) {
+          console.error("YouTube Player load error:", error);
+        }
       }
     }
-  }, [selectedVideo]);
+  }, [selectedVideo?.id]); // id가 바뀔 때만 실행되도록 수정
 
   const onReady: YouTubeProps["onReady"] = (event) => {
     playerRef.current = event.target;
@@ -83,8 +109,11 @@ const Player: React.FC<Props> = ({ selectedVideo }) => {
 
   const onStateChange: YouTubeProps["onStateChange"] = (event) => {
     const state = event.data;
+
     if (state === 1) setIsPlaying(true);
-    if (state === 2 || state === 0) setIsPlaying(false);
+    if (state === 2) setIsPlaying(false);
+
+    // 아래에 있던 state === 0 관련 if문과 setTimeout을 통째로 삭제하세요.
   };
 
   const togglePlay = (e: React.MouseEvent) => {
@@ -197,6 +226,12 @@ const Player: React.FC<Props> = ({ selectedVideo }) => {
             }}
             onReady={onReady}
             onStateChange={onStateChange}
+            onEnd={() => {
+              console.log("Video Ended - Moving to Next Video");
+              if (onVideoEnd) {
+                onVideoEnd(); // Home의 playNextVideo를 여기서 딱 한 번만 호출
+              }
+            }}
           />
         </div>
       </div>
@@ -204,4 +239,4 @@ const Player: React.FC<Props> = ({ selectedVideo }) => {
   );
 };
 
-export default Player;
+export default React.memo(Player);

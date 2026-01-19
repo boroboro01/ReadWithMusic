@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient"; // 추가
 import MainLayout from "../components/layout/MainLayout";
 import ContentContainer from "../components/layout/ContentContainer";
@@ -17,7 +17,6 @@ interface Playlist {
   id: string;
   title: string;
   genre: string;
-  era: string;
   mood: string;
   conditions: string;
   music: string;
@@ -63,7 +62,6 @@ function Home() {
   // 3. 태그 카테고리 추출 (이제 videoData 대신 playlists 상태 사용)
   const tagCategories = useMemo(() => {
     const moodTags = new Set<string>();
-    const eraTags = new Set<string>();
     const genreTags = new Set<string>();
     const conditionTags = new Set<string>();
     const musicTags = new Set<string>();
@@ -78,27 +76,9 @@ function Home() {
 
     playlists.forEach((pl) => {
       parseTags(pl.mood).forEach((t) => moodTags.add(t));
-      parseTags(pl.era).forEach((t) => eraTags.add(t));
       parseTags(pl.genre).forEach((t) => genreTags.add(t));
       parseTags(pl.conditions || "").forEach((t) => conditionTags.add(t));
       parseTags(pl.music || "").forEach((t) => musicTags.add(t));
-    });
-
-    // 시대 태그 커스텀 정렬 (고대 → 중세 → 근대 → 현대 → 미래 순)
-    const eraOrder = ["#고대", "#중세", "#근대", "#현대", "#미래"];
-    const sortedEraTags = Array.from(eraTags).sort((a, b) => {
-      const indexA = eraOrder.indexOf(a);
-      const indexB = eraOrder.indexOf(b);
-
-      // 둘 다 정의된 순서에 있는 경우
-      if (indexA !== -1 && indexB !== -1) {
-        return indexA - indexB;
-      }
-      // 하나만 정의된 순서에 있는 경우
-      if (indexA !== -1) return -1;
-      if (indexB !== -1) return 1;
-      // 둘 다 정의된 순서에 없는 경우 알파벳 순
-      return a.localeCompare(b);
     });
 
     // 분위기 태그 커스텀 정렬 (차분한, 밝은 앞쪽, 공포 맨 뒤)
@@ -131,7 +111,6 @@ function Home() {
     return [
       { title: "분위기", tags: sortedMoodTags },
       { title: "장르", tags: Array.from(genreTags).sort() },
-      { title: "시대", tags: sortedEraTags },
       { title: "환경", tags: Array.from(conditionTags).sort() },
       { title: "음악", tags: Array.from(musicTags).sort() },
     ];
@@ -145,7 +124,6 @@ function Home() {
       // pl.genre 등이 null일 경우를 대비해 빈 문자열("")로 치환 후 split 합니다.
       const plTags = [
         ...(pl.genre || "").split(","),
-        ...(pl.era || "").split(","),
         ...(pl.mood || "").split(","),
         ...(pl.conditions || "").split(","),
         ...(pl.music || "").split(","),
@@ -188,7 +166,7 @@ function Home() {
           ? prev.filter((t) => t !== tag)
           : [...prev, tag];
       } else {
-        // 시대, 장르, 음악은 단일 선택
+        // 장르, 음악은 단일 선택
         const categoryTags =
           tagCategories.find((cat) => cat.title === categoryTitle)?.tags || [];
 
@@ -213,6 +191,40 @@ function Home() {
       playlist_id: v.playlist_id,
     });
   };
+
+  // 다음 영상 재생 함수
+  const playNextVideo = useCallback(() => {
+    setSelectedVideo((current) => {
+      // 1. 현재 재생 중인 영상이 없으면 아무것도 안 함
+      if (!current) return null;
+
+      // 2. 현재 영상이 속한 플레이리스트의 비디오들 필터링
+      const currentPlaylistVideos = videos.filter(
+        (v) => v.playlist_id === current.playlist_id
+      );
+
+      if (currentPlaylistVideos.length === 0) return current;
+
+      // 3. 현재 인덱스 찾기
+      const currentIndex = currentPlaylistVideos.findIndex(
+        (v) => v.youtube_id === current.id
+      );
+
+      // 4. 다음 인덱스 계산 (마지막이면 처음으로)
+      const nextIndex = (currentIndex + 1) % currentPlaylistVideos.length;
+      const nextVideo = currentPlaylistVideos[nextIndex];
+
+      // 5. 새로운 Video 객체 반환 (타입 정의에 맞춰서)
+      return {
+        id: nextVideo.youtube_id,
+        title: nextVideo.title,
+        author: nextVideo.author,
+        duration: nextVideo.duration,
+        thumbnail: `https://img.youtube.com/vi/${nextVideo.youtube_id}/hqdefault.jpg`,
+        playlist_id: nextVideo.playlist_id,
+      };
+    });
+  }, [videos]); // videos 데이터가 변경될 때만 함수 갱신
 
   if (loading)
     return (
@@ -295,7 +307,6 @@ function Home() {
                 </h2>
                 <PlaylistTags
                   genre={playlist.genre}
-                  era={playlist.era}
                   mood={playlist.mood}
                   conditions={playlist.conditions}
                   music={playlist.music}
@@ -321,7 +332,28 @@ function Home() {
           );
         })
       )}
-      <Player selectedVideo={selectedVideo} />
+
+      <Player selectedVideo={selectedVideo} onVideoEnd={playNextVideo} />
+
+      {/* 디버깅을 위한 임시 로그 */}
+      {selectedVideo && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            right: 0,
+            background: "black",
+            color: "white",
+            padding: "10px",
+            zIndex: 1000,
+          }}
+        >
+          Current: {selectedVideo.title}
+          <br />
+          Has playNextVideo:{" "}
+          {typeof playNextVideo === "function" ? "Yes" : "No"}
+        </div>
+      )}
     </MainLayout>
   );
 }
