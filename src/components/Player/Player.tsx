@@ -323,7 +323,7 @@ const Player = (props: Props) => {
             }}
           />
         </div>
-        
+
         {/* 모바일용 음량 조절 UI (기존 컴포넌트 재사용) */}
         <div className="mobile-volume-wrapper">
           <div className="mini-controls" onClick={(e) => e.stopPropagation()}>
@@ -347,7 +347,7 @@ const Player = (props: Props) => {
             />
           </div>
         </div>
-        
+
         <div className="policy-notice">
           본 서비스는 YouTube API 가이드라인을 준수하여 운영됩니다
           <br />
