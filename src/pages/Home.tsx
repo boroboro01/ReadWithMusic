@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient"; // 추가
 import MainLayout from "../components/layout/MainLayout";
+import Header from "../components/layout/Header";
 import ContentContainer from "../components/layout/ContentContainer";
 import HorizontalList from "../components/list/HorizontalList";
 import VideoCard from "../components/card/VideoCard";
@@ -9,7 +10,6 @@ import PlaylistTags from "../components/common/PlaylistTags";
 import TagFilter from "../components/common/TagFilter";
 import IntroSection from "../components/common/IntroSection";
 import type { Video } from "../types/video";
-import logo from "../assets/logo.png";
 import "../styles/intro.css";
 
 // 인터페이스 정의 (Supabase 데이터 구조와 일치)
@@ -27,6 +27,8 @@ function Home() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isPlayerExpanded, setIsPlayerExpanded] = useState(false); // 플레이어 확장 상태 관리
+  const [showTooltip, setShowTooltip] = useState(true); // 툴팁 상태 관리 - 기본적으로 표시
+  const [hasHovered, setHasHovered] = useState(false); // 한 번이라도 호버했는지 여부
 
   // 1. Supabase에서 받아올 상태값 설정
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
@@ -191,6 +193,8 @@ function Home() {
       thumbnail: `https://img.youtube.com/vi/${v.youtube_id}/hqdefault.jpg`,
       playlist_id: v.playlist_id,
     });
+    // 처음 영상 클릭 시 플레이어를 확장된 상태로 표시
+    setIsPlayerExpanded(true);
   };
 
   // 다음 영상 재생 함수
@@ -272,24 +276,12 @@ function Home() {
 
   return (
     <MainLayout>
-      <header
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          padding: "24px 0px 24px 60px",
-          backgroundColor: "rgba(0, 0, 0, 0.7)",
-        }}
-      >
-        <img
-          src={logo}
-          alt="독서 모드 로고"
-          style={{
-            height: "36px",
-            width: "auto",
-          }}
-        />
-      </header>
+      <Header
+        hasHovered={hasHovered}
+        setHasHovered={setHasHovered}
+        showTooltip={showTooltip}
+        setShowTooltip={setShowTooltip}
+      />
 
       <IntroSection />
 
@@ -338,10 +330,7 @@ function Home() {
           return (
             <section key={playlist.id} style={{ marginBottom: "20px" }}>
               <ContentContainer>
-                <h2
-                  className="page-title"
-                  style={{ fontSize: "1.5rem", marginBottom: "8px" }}
-                >
+                <h2 className="page-title" style={{ marginBottom: "8px" }}>
                   {playlist.title}
                 </h2>
                 <PlaylistTags
@@ -380,6 +369,34 @@ function Home() {
         onPrevious={playPreviousVideo}
         onNext={playNext}
       />
+
+      <footer
+        style={{
+          backgroundColor: "rgba(0, 0, 0, 0.8)",
+          borderTop: "1px solid #374151",
+          padding: "24px 0",
+          marginTop: "80px",
+          marginBottom: selectedVideo ? "70px" : "0",
+          textAlign: "center",
+        }}
+      >
+        <div
+          className="footer-text"
+          style={{
+            color: "#9ca3af",
+            letterSpacing: "1.5px",
+            lineHeight: "1.6",
+          }}
+        >
+          © 2026 ReadWithMusic. All rights reserved.
+          <br />본 서비스는 YouTube API 가이드라인을 준수하여 운영됩니다.
+          <br />
+          사이트 내 임베딩된 모든 영상의 저작권 및 광고 수익에 대한 권리는 각
+          영상의 원저작자(YouTube 채널 소유자)에게 있습니다.
+          <br />본 서비스는 영상의 직접적인 복제나 다운로드 기능을 제공하지
+          않습니다.
+        </div>
+      </footer>
     </MainLayout>
   );
 }

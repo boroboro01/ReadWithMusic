@@ -9,6 +9,7 @@ function ContentContainer({ children }: Props) {
         margin: "0 auto",
         padding: "0px 0px 6px 60px",
       }}
+      className="content-container"
     >
       {children}
     </div>

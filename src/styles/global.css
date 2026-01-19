@@ -20,6 +20,18 @@ body {
   text-align: left;
 }
 
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 20px;
+  }
+}
+
 /* ======================
    Playlist Tags
    ====================== */
@@ -146,4 +158,74 @@ body {
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/* ======================
+   Tooltip Animation
+   ====================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Mobile responsive padding for content container */
+@media (max-width: 768px) {
+  .content-container {
+    padding: 0px 0px 6px 20px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-container {
+    padding: 0px 0px 6px 16px !important;
+  }
+}
+
+.footer-text {
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .footer-text {
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-text {
+    font-size: 10px;
+    letter-spacing: 0.8px;
+    line-height: 1.5;
+  }
+}
+
+/* Header mobile styles */
+@media (max-width: 768px) {
+  .header-logo {
+    height: 28px !important;
+  }
+
+  .feedback-button {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-logo {
+    height: 24px !important;
+  }
+
+  .feedback-button {
+    padding: 5px 10px !important;
+    font-size: 11px !important;
+  }
 }

@@ -49,6 +49,49 @@
   border-radius: 4px;
 }
 
+/* Hide volume controls on mobile but keep thumbnail and prev/next */
+@media (max-width: 768px) {
+  .player-container .mini-bar .thumb {
+    width: 70px;
+    height: 39px;
+    min-width: 70px;
+    max-width: 70px;
+  }
+
+  .player-container .mini-controls {
+    display: none;
+  }
+
+  /* Show volume controls in mobile expanded player */
+  .mobile-volume-wrapper .mini-controls {
+    display: flex !important;
+  }
+
+  /* Move controls to right side on mobile */
+  .player-container .mini-center {
+    position: static;
+    transform: none;
+    left: auto;
+    margin-left: auto;
+    margin-right: 8px;
+  }
+
+  /* Mobile volume wrapper in expanded player */
+  .mobile-volume-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+    margin: 16px 0;
+  }
+}
+
+/* Hide mobile volume wrapper on desktop */
+@media (min-width: 769px) {
+  .mobile-volume-wrapper {
+    display: none;
+  }
+}
+
 .mini-bar .meta {
   display: flex;
   flex-direction: column;
@@ -183,6 +226,21 @@
   justify-content: center;
   width: 32px;
   height: 32px;
+  transition: all 0.2s ease;
+}
+
+/* 비활성화된 버튼 스타일 */
+.mini-center .play-btn.disabled,
+.mini-center .nav-btn.disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+}
+
+.mini-center .play-btn.disabled:hover,
+.mini-center .nav-btn.disabled:hover {
+  background: transparent;
+  transform: none;
 }
 
 /* 확장/축소 버튼 스타일 */
@@ -301,6 +359,15 @@
   height: 100% !important;
 }
 
+/* 정책 안내 문구 스타일 */
+.policy-notice {
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
+}
+
 /* small responsive tweaks */
 @media (max-width: 640px) {
   .mini-bar .thumb {
@@ -309,5 +376,10 @@
   }
   .mini-bar .title {
     font-size: 13px;
+  }
+
+  .policy-notice {
+    font-size: 12px;
+    padding: 10px 12px;
   }
 }

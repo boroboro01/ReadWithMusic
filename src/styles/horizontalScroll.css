@@ -6,6 +6,18 @@
   padding-top: 8px; /* 썸네일 확대를 위한 최소 상단 여백 */
 }
 
+@media (max-width: 768px) {
+  .horizontal-wrapper {
+    margin-left: -20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .horizontal-wrapper {
+    margin-left: -16px;
+  }
+}
+
 /* 스크롤 영역 */
 .horizontal-scroll {
   display: flex;
@@ -30,6 +42,46 @@
     black calc(100% - 72px),
     transparent 100%
   );
+}
+
+@media (max-width: 768px) {
+  .horizontal-scroll {
+    padding: 5px 20px 8px 20px;
+    mask: linear-gradient(
+      to right,
+      transparent 0px,
+      black 20px,
+      black calc(100% - 32px),
+      transparent 100%
+    );
+    -webkit-mask: linear-gradient(
+      to right,
+      transparent 0px,
+      black 20px,
+      black calc(100% - 32px),
+      transparent 100%
+    );
+  }
+}
+
+@media (max-width: 480px) {
+  .horizontal-scroll {
+    padding: 5px 16px 8px 16px;
+    mask: linear-gradient(
+      to right,
+      transparent 0px,
+      black 16px,
+      black calc(100% - 28px),
+      transparent 100%
+    );
+    -webkit-mask: linear-gradient(
+      to right,
+      transparent 0px,
+      black 16px,
+      black calc(100% - 28px),
+      transparent 100%
+    );
+  }
 }
 
 .horizontal-scroll::-webkit-scrollbar {
