@@ -9,6 +9,7 @@ import Player from "../components/Player/Player";
 import PlaylistTags from "../components/common/PlaylistTags";
 import TagFilter from "../components/common/TagFilter";
 import IntroSection from "../components/common/IntroSection";
+import RecentlyWatchedVideos from "../components/common/RecentlyWatchedVideos";
 import type { Video } from "../types/video";
 import "../styles/intro.css";
 
@@ -195,6 +196,32 @@ function Home() {
     });
     // 처음 영상 클릭 시 플레이어를 확장된 상태로 표시
     setIsPlayerExpanded(true);
+
+    // Save to localStorage for recently watched
+    const recentVideo = {
+      youtube_id: v.youtube_id,
+      timestamp: Date.now(),
+    };
+
+    try {
+      const stored = localStorage.getItem("recent_videos");
+      let recentVideos = stored ? JSON.parse(stored) : [];
+
+      // Remove if already exists (to update timestamp)
+      recentVideos = recentVideos.filter(
+        (item: any) => item.youtube_id !== v.youtube_id,
+      );
+
+      // Add to beginning
+      recentVideos.unshift(recentVideo);
+
+      // Keep only last 20 items
+      recentVideos = recentVideos.slice(0, 20);
+
+      localStorage.setItem("recent_videos", JSON.stringify(recentVideos));
+    } catch (error) {
+      console.error("Failed to save to localStorage:", error);
+    }
   };
 
   // 다음 영상 재생 함수
@@ -205,14 +232,14 @@ function Home() {
 
       // 2. 현재 영상이 속한 플레이리스트의 비디오들 필터링
       const currentPlaylistVideos = videos.filter(
-        (v) => v.playlist_id === current.playlist_id
+        (v) => v.playlist_id === current.playlist_id,
       );
 
       if (currentPlaylistVideos.length === 0) return current;
 
       // 3. 현재 인덱스 찾기
       const currentIndex = currentPlaylistVideos.findIndex(
-        (v) => v.youtube_id === current.id
+        (v) => v.youtube_id === current.id,
       );
 
       // 4. 다음 인덱스 계산 (마지막이면 처음으로)
@@ -237,13 +264,13 @@ function Home() {
       if (!current) return null;
 
       const currentPlaylistVideos = videos.filter(
-        (v) => v.playlist_id === current.playlist_id
+        (v) => v.playlist_id === current.playlist_id,
       );
 
       if (currentPlaylistVideos.length === 0) return current;
 
       const currentIndex = currentPlaylistVideos.findIndex(
-        (v) => v.youtube_id === current.id
+        (v) => v.youtube_id === current.id,
       );
 
       // 이전 인덱스 계산 (첫 번째면 마지막으로)
@@ -294,6 +321,14 @@ function Home() {
         />
       </ContentContainer>
 
+      <ContentContainer>
+        <RecentlyWatchedVideos
+          videos={videos}
+          onSelect={handleSelect}
+          selectedVideo={selectedVideo}
+        />
+      </ContentContainer>
+
       {selectedTags.length > 0 && filteredPlaylists.length === 0 ? (
         <ContentContainer>
           <div
@@ -323,7 +358,7 @@ function Home() {
         filteredPlaylists.map((playlist) => {
           // 비디오 상태에서 필터링
           const filteredVideos = videos.filter(
-            (v) => v.playlist_id === playlist.id
+            (v) => v.playlist_id === playlist.id,
           );
           if (filteredVideos.length === 0) return null;
 
