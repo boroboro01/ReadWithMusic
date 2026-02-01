@@ -590,11 +590,7 @@ function Home() {
       </ContentContainer>
 
       <ContentContainer>
-        <RecentlyWatchedVideos
-          videos={videos}
-          onSelect={handleSelect}
-          selectedVideo={selectedVideo}
-        />
+        <RecentlyWatchedVideos videos={videos} onSelect={handleSelect} />
       </ContentContainer>
 
       {selectedTags.length > 0 && filteredPlaylists.length === 0 ? (

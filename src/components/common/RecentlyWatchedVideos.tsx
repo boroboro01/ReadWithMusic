@@ -1,12 +1,10 @@
 import React, { useEffect, useState, useMemo } from "react";
 import HorizontalList from "../list/HorizontalList";
-import VideoCard from "../card/VideoCard";
 import type { Video } from "../../types/video";
 
 interface RecentlyWatchedVideosProps {
   videos: any[]; // Supabase video data
   onSelect: (video: any) => void;
-  selectedVideo: Video | null;
 }
 
 interface RecentVideo {
@@ -18,7 +16,6 @@ interface RecentVideo {
 const RecentlyWatchedVideos: React.FC<RecentlyWatchedVideosProps> = ({
   videos,
   onSelect,
-  selectedVideo,
 }) => {
   const [recentVideos, setRecentVideos] = useState<RecentVideo[]>([]);
 

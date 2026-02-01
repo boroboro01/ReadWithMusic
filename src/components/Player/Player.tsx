@@ -38,7 +38,7 @@ const Player = (props: Props) => {
   const [volume, setVolume] = useState<number>(60);
   const [muted, setMuted] = useState<boolean>(false);
   const playerRef = useRef<any>(null);
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const progressIntervalRef = useRef<number | null>(null);
 
   // Function to update video progress in localStorage
   const updateVideoProgress = useCallback(

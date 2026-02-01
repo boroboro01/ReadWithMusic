@@ -64,23 +64,28 @@ const TagFilter: React.FC<TagFilterProps> = ({
         if (category.tags.length === 0) return null;
 
         // 현재 카테고리에서 선택된 태그들 찾기
-        const selectedTagsInCategory = selectedTags.filter(tag => 
-          category.tags.includes(tag)
+        const selectedTagsInCategory = selectedTags.filter((tag) =>
+          category.tags.includes(tag),
         );
 
         return (
           <div key={category.title} className="tag-category">
-            <div className="tag-category-header" style={{ 
-              display: "flex", 
-              justifyContent: "flex-start", 
-              alignItems: "center",
-              marginBottom: "8px",
-              gap: "8px"
-            }}>
-              <h4 className="tag-category-title" style={{ margin: 0 }}>{category.title}</h4>
+            <div
+              className="tag-category-header"
+              style={{
+                display: "flex",
+                justifyContent: "flex-start",
+                alignItems: "center",
+                marginBottom: "8px",
+                gap: "8px",
+              }}
+            >
+              <h4 className="tag-category-title" style={{ margin: 0 }}>
+                {category.title}
+              </h4>
               {selectedTagsInCategory.length > 0 && (
-                <button 
-                  className="clear-category-btn" 
+                <button
+                  className="clear-category-btn"
                   onClick={() => onClearCategory(category.title)}
                   style={{
                     background: "none",
@@ -93,7 +98,8 @@ const TagFilter: React.FC<TagFilterProps> = ({
                     transition: "all 0.2s ease",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+                    e.currentTarget.style.background =
+                      "rgba(255, 255, 255, 0.1)";
                     e.currentTarget.style.color = "white";
                   }}
                   onMouseLeave={(e) => {
