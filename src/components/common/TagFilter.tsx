@@ -68,8 +68,10 @@ const TagFilter: React.FC<TagFilterProps> = ({
               {category.tags.map((tag) => {
                 const isSelected = selectedTags.includes(tag);
                 const disabledTags = getDisabledTags(category.title);
-                const isMoodDisabled = !isSelected && disabledTags.includes(tag);
-                const isNotAvailable = !isSelected && !availableTags.includes(tag);
+                const isMoodDisabled =
+                  !isSelected && disabledTags.includes(tag);
+                const isNotAvailable =
+                  !isSelected && !availableTags.includes(tag);
                 const isDisabled = isMoodDisabled || isNotAvailable;
 
                 return (

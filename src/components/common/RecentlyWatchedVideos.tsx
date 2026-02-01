@@ -60,6 +60,36 @@ const RecentlyWatchedVideos: React.FC<RecentlyWatchedVideosProps> = ({
       .filter(Boolean); // Remove undefined entries
   }, [recentVideos, videos]);
 
+  // Handle delete function
+  const handleDelete = (videoId: string, event: React.MouseEvent) => {
+    // Prevent video from playing when delete button is clicked
+    event.stopPropagation();
+
+    // Show confirmation dialog
+    const confirmed = window.confirm("최근 시청한 목록에서 삭제하시겠어요?");
+
+    if (confirmed) {
+      try {
+        // Update localStorage
+        const stored = localStorage.getItem("recent_videos");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const updatedVideos = parsed.filter(
+            (item: any) => item.youtube_id !== videoId,
+          );
+          localStorage.setItem("recent_videos", JSON.stringify(updatedVideos));
+        }
+
+        // Update state to reflect the change immediately
+        setRecentVideos((prev) =>
+          prev.filter((video) => video.youtube_id !== videoId),
+        );
+      } catch (error) {
+        console.error("Failed to delete video from recent list:", error);
+      }
+    }
+  };
+
   // Don't render if no recent videos
   if (recentVideoData.length === 0) {
     return null;
@@ -114,6 +144,41 @@ const RecentlyWatchedVideos: React.FC<RecentlyWatchedVideosProps> = ({
                 >
                   ▶
                 </button>
+
+                {/* Delete button */}
+                <button
+                  onClick={(e) => handleDelete(video.youtube_id, e)}
+                  style={{
+                    position: "absolute",
+                    top: "5px",
+                    right: "5px",
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "50%",
+                    border: "none",
+                    backgroundColor: "rgba(0, 0, 0, 0.7)",
+                    color: "white",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 20,
+                    transition: "background-color 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor =
+                      "rgba(220, 38, 38, 0.9)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor =
+                      "rgba(0, 0, 0, 0.7)";
+                  }}
+                  aria-label={`Remove ${video.title} from recent videos`}
+                >
+                  ✕
+                </button>
+
                 {/* Progress bar overlay */}
                 {progress > 0 && (
                   <div
