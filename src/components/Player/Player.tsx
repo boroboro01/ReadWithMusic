@@ -58,6 +58,7 @@ const Player = (props: Props) => {
 
         if (videoIndex !== -1) {
           recentVideos[videoIndex].progress = Math.min(progress, 100);
+          recentVideos[videoIndex].lastTimestamp = currentTime; // Save exact timestamp in seconds
           localStorage.setItem("recent_videos", JSON.stringify(recentVideos));
         }
       } catch (error) {
@@ -66,6 +67,22 @@ const Player = (props: Props) => {
     },
     [],
   );
+
+  // Function to get stored timestamp for a video
+  const getStoredTimestamp = useCallback((youtubeId: string): number => {
+    try {
+      const stored = localStorage.getItem("recent_videos");
+      if (!stored) return 0;
+
+      const recentVideos = JSON.parse(stored);
+      const video = recentVideos.find((item: any) => item.youtube_id === youtubeId);
+      
+      return video?.lastTimestamp || 0;
+    } catch (error) {
+      console.error("Failed to get stored timestamp:", error);
+      return 0;
+    }
+  }, []);
 
   // Function to start progress tracking
   const startProgressTracking = useCallback(() => {
@@ -201,6 +218,20 @@ const Player = (props: Props) => {
       else if (!muted && playerRef.current?.unMute) playerRef.current.unMute();
     } catch (e) {}
 
+    // Resume playback from stored timestamp
+    if (selectedVideo && playerRef.current) {
+      const storedTimestamp = getStoredTimestamp(selectedVideo.id);
+      
+      if (storedTimestamp > 0) {
+        try {
+          // Seek to stored position
+          playerRef.current.seekTo(storedTimestamp, true);
+        } catch (error) {
+          console.error("Failed to seek to stored timestamp:", error);
+        }
+      }
+    }
+
     if (pendingPlay && playerRef.current && playerRef.current.playVideo) {
       try {
         playerRef.current.playVideo();
@@ -226,9 +257,25 @@ const Player = (props: Props) => {
       stopProgressTracking();
     }
     if (state === 0 && selectedVideo) {
-      // Video ended - update progress to 100% and stop tracking
+      // Video ended - update progress to 100% and clear timestamp
       stopProgressTracking();
-      updateVideoProgress(selectedVideo.id, 1, 1); // Set to 100%
+      try {
+        const stored = localStorage.getItem("recent_videos");
+        if (stored) {
+          let recentVideos = JSON.parse(stored);
+          const videoIndex = recentVideos.findIndex(
+            (item: any) => item.youtube_id === selectedVideo.id,
+          );
+          
+          if (videoIndex !== -1) {
+            recentVideos[videoIndex].progress = 100;
+            recentVideos[videoIndex].lastTimestamp = 0; // Clear timestamp when video is completed
+            localStorage.setItem("recent_videos", JSON.stringify(recentVideos));
+          }
+        }
+      } catch (error) {
+        console.error("Failed to update completion status:", error);
+      }
     }
 
     // 아래에 있던 state === 0 관련 if문과 setTimeout을 통째로 삭제하세요.
