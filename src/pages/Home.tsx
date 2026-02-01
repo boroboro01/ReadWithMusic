@@ -69,6 +69,7 @@ function Home() {
     const genreTags = new Set<string>();
     const conditionTags = new Set<string>();
     const musicTags = new Set<string>();
+    const durationTags = new Set<string>();
 
     const parseTags = (tagString: string): string[] => {
       if (!tagString || tagString.trim() === "") return [];
@@ -78,11 +79,47 @@ function Home() {
         .filter((t) => t.startsWith("#"));
     };
 
+    // Parse duration string (e.g., "1:23:45" or "45:30") to minutes
+    const parseDurationToMinutes = (duration: string): number => {
+      if (!duration) return 0;
+      const parts = duration.split(":").map(Number);
+      if (parts.length === 3) {
+        // Format: "H:MM:SS"
+        return parts[0] * 60 + parts[1] + parts[2] / 60;
+      } else if (parts.length === 2) {
+        // Format: "MM:SS"
+        return parts[0] + parts[1] / 60;
+      }
+      return 0;
+    };
+
+    // Get duration category tag for a video
+    const getDurationTag = (duration: string): string => {
+      const minutes = parseDurationToMinutes(duration);
+      const hours = minutes / 60;
+
+      if (hours <= 1) return "#-1시간";
+      else if (hours <= 2) return "#1-2시간";
+      else if (hours <= 3) return "#2-3시간";
+      else return "#3시간+";
+    };
+
     playlists.forEach((pl) => {
       parseTags(pl.mood).forEach((t) => moodTags.add(t));
       parseTags(pl.genre).forEach((t) => genreTags.add(t));
       parseTags(pl.conditions || "").forEach((t) => conditionTags.add(t));
       parseTags(pl.music || "").forEach((t) => musicTags.add(t));
+    });
+
+    // Add duration tags based on videos in each playlist
+    playlists.forEach((playlist) => {
+      const playlistVideos = videos.filter(
+        (v) => v.playlist_id === playlist.id,
+      );
+      playlistVideos.forEach((video) => {
+        const durationTag = getDurationTag(video.duration);
+        durationTags.add(durationTag);
+      });
     });
 
     // 분위기 태그 커스텀 정렬 (차분한, 밝은 앞쪽, 공포 맨 뒤)
@@ -112,20 +149,51 @@ function Home() {
       return a.localeCompare(b);
     });
 
+    // Duration tags custom order
+    const durationOrder = ["#-1시간", "#1-2시간", "#2-3시간", "#3시간+"];
+    const sortedDurationTags = Array.from(durationTags).sort((a, b) => {
+      const indexA = durationOrder.indexOf(a);
+      const indexB = durationOrder.indexOf(b);
+      return indexA - indexB;
+    });
+
     return [
       { title: "분위기", tags: sortedMoodTags },
       { title: "장르", tags: Array.from(genreTags).sort() },
       { title: "환경", tags: Array.from(conditionTags).sort() },
       { title: "음악", tags: Array.from(musicTags).sort() },
+      { title: "시간", tags: sortedDurationTags },
     ];
-  }, [playlists]); // playlists가 바뀔 때만 재계산
+  }, [playlists, videos]); // videos 의존성 추가
 
   // 4. 태그 필터링 로직 (filteredPlaylists)
   const filteredPlaylists = useMemo(() => {
     if (selectedTags.length === 0) return playlists;
 
+    // Helper function to parse duration and get category tag
+    const parseDurationToMinutes = (duration: string): number => {
+      if (!duration) return 0;
+      const parts = duration.split(":").map(Number);
+      if (parts.length === 3) {
+        return parts[0] * 60 + parts[1] + parts[2] / 60;
+      } else if (parts.length === 2) {
+        return parts[0] + parts[1] / 60;
+      }
+      return 0;
+    };
+
+    const getDurationTag = (duration: string): string => {
+      const minutes = parseDurationToMinutes(duration);
+      const hours = minutes / 60;
+
+      if (hours <= 1) return "#-1시간";
+      else if (hours <= 2) return "#1-2시간";
+      else if (hours <= 3) return "#2-3시간";
+      else return "#3시간+";
+    };
+
     return playlists.filter((pl) => {
-      // pl.genre 등이 null일 경우를 대비해 빈 문자열("")로 치환 후 split 합니다.
+      // Regular playlist tags
       const plTags = [
         ...(pl.genre || "").split(","),
         ...(pl.mood || "").split(","),
@@ -133,10 +201,40 @@ function Home() {
         ...(pl.music || "").split(","),
       ].map((t) => t.trim());
 
-      // 선택한 모든 태그가 플레이리스트에 포함되어야 함 (AND 조건)
-      return selectedTags.every((tag) => plTags.includes(tag));
+      // Check if any selected tags are duration tags
+      const selectedDurationTags = selectedTags.filter(
+        (tag) =>
+          tag.includes("-1시간") ||
+          tag.includes("1-2시간") ||
+          tag.includes("2-3시간") ||
+          tag.includes("3시간+"),
+      );
+      const selectedNonDurationTags = selectedTags.filter(
+        (tag) => !selectedDurationTags.includes(tag),
+      );
+
+      // Check regular tags (non-duration)
+      const regularTagsMatch =
+        selectedNonDurationTags.length === 0 ||
+        selectedNonDurationTags.every((tag) => plTags.includes(tag));
+
+      // Check duration tags
+      let durationTagsMatch = true;
+      if (selectedDurationTags.length > 0) {
+        const playlistVideos = videos.filter((v) => v.playlist_id === pl.id);
+
+        // For duration filtering, check if ANY video in the playlist matches the duration criteria
+        durationTagsMatch = selectedDurationTags.every((selectedDurationTag) =>
+          playlistVideos.some((video) => {
+            const videoDurationTag = getDurationTag(video.duration);
+            return videoDurationTag === selectedDurationTag;
+          }),
+        );
+      }
+
+      return regularTagsMatch && durationTagsMatch;
     });
-  }, [selectedTags, playlists]);
+  }, [selectedTags, playlists, videos]);
 
   // 나머지 핸들러 (동일)
   // 분위기 태그 상호 배타 관계 정의
@@ -169,6 +267,18 @@ function Home() {
         return prev.includes(tag)
           ? prev.filter((t) => t !== tag)
           : [...prev, tag];
+      } else if (categoryTitle === "시간") {
+        // 시간은 단일 선택 (한 번에 하나의 시간 범위만)
+        const durationTags =
+          tagCategories.find((cat) => cat.title === "시간")?.tags || [];
+
+        if (prev.includes(tag)) {
+          // 이미 선택된 태그를 클릭하면 해제
+          return prev.filter((t) => t !== tag);
+        } else {
+          // 새로운 태그를 선택하면 같은 카테고리의 다른 태그들은 제거하고 새 태그 추가
+          return [...prev.filter((t) => !durationTags.includes(t)), tag];
+        }
       } else {
         // 장르, 음악은 단일 선택
         const categoryTags =
@@ -372,10 +482,49 @@ function Home() {
         </ContentContainer>
       ) : (
         filteredPlaylists.map((playlist) => {
-          // 비디오 상태에서 필터링
-          const filteredVideos = videos.filter(
+          // Helper functions for duration filtering
+          const parseDurationToMinutes = (duration: string): number => {
+            if (!duration) return 0;
+            const parts = duration.split(":").map(Number);
+            if (parts.length === 3) {
+              return parts[0] * 60 + parts[1] + parts[2] / 60;
+            } else if (parts.length === 2) {
+              return parts[0] + parts[1] / 60;
+            }
+            return 0;
+          };
+
+          const getDurationTag = (duration: string): string => {
+            const minutes = parseDurationToMinutes(duration);
+            const hours = minutes / 60;
+
+            if (hours <= 1) return "#-1시간";
+            else if (hours <= 2) return "#1-2시간";
+            else if (hours <= 3) return "#2-3시간";
+            else return "#3시간+";
+          };
+
+          // Get videos for this playlist
+          let filteredVideos = videos.filter(
             (v) => v.playlist_id === playlist.id,
           );
+
+          // Apply duration filtering if duration tags are selected
+          const selectedDurationTags = selectedTags.filter(
+            (tag) =>
+              tag.includes("-1시간") ||
+              tag.includes("1-2시간") ||
+              tag.includes("2-3시간") ||
+              tag.includes("3시간+"),
+          );
+
+          if (selectedDurationTags.length > 0) {
+            filteredVideos = filteredVideos.filter((video) => {
+              const videoDurationTag = getDurationTag(video.duration);
+              return selectedDurationTags.includes(videoDurationTag);
+            });
+          }
+
           if (filteredVideos.length === 0) return null;
 
           return (

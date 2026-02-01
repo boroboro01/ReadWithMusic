@@ -75,8 +75,10 @@ const Player = (props: Props) => {
       if (!stored) return 0;
 
       const recentVideos = JSON.parse(stored);
-      const video = recentVideos.find((item: any) => item.youtube_id === youtubeId);
-      
+      const video = recentVideos.find(
+        (item: any) => item.youtube_id === youtubeId,
+      );
+
       return video?.lastTimestamp || 0;
     } catch (error) {
       console.error("Failed to get stored timestamp:", error);
@@ -221,7 +223,7 @@ const Player = (props: Props) => {
     // Resume playback from stored timestamp
     if (selectedVideo && playerRef.current) {
       const storedTimestamp = getStoredTimestamp(selectedVideo.id);
-      
+
       if (storedTimestamp > 0) {
         try {
           // Seek to stored position
@@ -266,7 +268,7 @@ const Player = (props: Props) => {
           const videoIndex = recentVideos.findIndex(
             (item: any) => item.youtube_id === selectedVideo.id,
           );
-          
+
           if (videoIndex !== -1) {
             recentVideos[videoIndex].progress = 100;
             recentVideos[videoIndex].lastTimestamp = 0; // Clear timestamp when video is completed
