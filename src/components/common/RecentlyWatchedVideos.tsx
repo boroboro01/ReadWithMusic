@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
 import HorizontalList from "../list/HorizontalList";
-import type { Video } from "../../types/video";
 
 interface RecentlyWatchedVideosProps {
   videos: any[]; // Supabase video data
