@@ -166,6 +166,136 @@ function Home() {
     ];
   }, [playlists, videos]); // videos 의존성 추가
 
+  // Helper function to get available tags based on current selection
+  const getAvailableTags = useCallback(
+    (currentSelectedTags: string[]) => {
+      const availableTags = new Set<string>();
+
+      // Helper functions for duration parsing (reused from above)
+      const parseDurationToMinutes = (duration: string): number => {
+        if (!duration) return 0;
+        const parts = duration.split(":").map(Number);
+        if (parts.length === 3) {
+          return parts[0] * 60 + parts[1] + parts[2] / 60;
+        } else if (parts.length === 2) {
+          return parts[0] + parts[1] / 60;
+        }
+        return 0;
+      };
+
+      const getDurationTag = (duration: string): string => {
+        const minutes = parseDurationToMinutes(duration);
+        const hours = minutes / 60;
+
+        if (hours <= 1) return "#-1시간";
+        else if (hours <= 2) return "#1-2시간";
+        else if (hours <= 3) return "#2-3시간";
+        else return "#3시간+";
+      };
+
+      const parseTags = (tagString: string): string[] => {
+        if (!tagString || tagString.trim() === "") return [];
+        return tagString
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t.startsWith("#"));
+      };
+
+      // If no tags are selected, all tags are available
+      if (currentSelectedTags.length === 0) {
+        // Add all playlist tags
+        playlists.forEach((pl) => {
+          parseTags(pl.mood).forEach((t) => availableTags.add(t));
+          parseTags(pl.genre).forEach((t) => availableTags.add(t));
+          parseTags(pl.conditions || "").forEach((t) => availableTags.add(t));
+          parseTags(pl.music || "").forEach((t) => availableTags.add(t));
+        });
+
+        // Add all duration tags
+        videos.forEach((video) => {
+          const durationTag = getDurationTag(video.duration);
+          availableTags.add(durationTag);
+        });
+
+        return Array.from(availableTags);
+      }
+
+      // Separate duration and non-duration tags
+      const selectedDurationTags = currentSelectedTags.filter(
+        (tag) =>
+          tag.includes("-1시간") ||
+          tag.includes("1-2시간") ||
+          tag.includes("2-3시간") ||
+          tag.includes("3시간+"),
+      );
+      const selectedNonDurationTags = currentSelectedTags.filter(
+        (tag) => !selectedDurationTags.includes(tag),
+      );
+
+      // Filter videos based on current selection
+      let filteredVideos = videos;
+
+      // Apply duration filtering if duration tags are selected
+      if (selectedDurationTags.length > 0) {
+        filteredVideos = filteredVideos.filter((video) => {
+          const videoDurationTag = getDurationTag(video.duration);
+          return selectedDurationTags.includes(videoDurationTag);
+        });
+      }
+
+      // Apply non-duration tag filtering
+      if (selectedNonDurationTags.length > 0) {
+        const filteredPlaylistIds = playlists
+          .filter((pl) => {
+            const plTags = [
+              ...(pl.genre || "").split(","),
+              ...(pl.mood || "").split(","),
+              ...(pl.conditions || "").split(","),
+              ...(pl.music || "").split(","),
+            ].map((t) => t.trim());
+
+            return selectedNonDurationTags.every((tag) => plTags.includes(tag));
+          })
+          .map((pl) => pl.id);
+
+        filteredVideos = filteredVideos.filter((video) =>
+          filteredPlaylistIds.includes(video.playlist_id),
+        );
+      }
+
+      // Get unique playlist IDs from filtered videos
+      const filteredPlaylistIds = [
+        ...new Set(filteredVideos.map((v) => v.playlist_id)),
+      ];
+
+      // Collect all tags from filtered playlists
+      const filteredPlaylists = playlists.filter((pl) =>
+        filteredPlaylistIds.includes(pl.id),
+      );
+      filteredPlaylists.forEach((pl) => {
+        parseTags(pl.mood).forEach((t) => availableTags.add(t));
+        parseTags(pl.genre).forEach((t) => availableTags.add(t));
+        parseTags(pl.conditions || "").forEach((t) => availableTags.add(t));
+        parseTags(pl.music || "").forEach((t) => availableTags.add(t));
+      });
+
+      // Collect duration tags from filtered videos
+      filteredVideos.forEach((video) => {
+        const durationTag = getDurationTag(video.duration);
+        availableTags.add(durationTag);
+      });
+
+      return Array.from(availableTags);
+    },
+    [playlists, videos],
+  );
+
+  // Get available tags based on current selection
+  const availableTags = useMemo(
+    () => getAvailableTags(selectedTags),
+    [getAvailableTags, selectedTags],
+  );
+
   // 4. 태그 필터링 로직 (filteredPlaylists)
   const filteredPlaylists = useMemo(() => {
     if (selectedTags.length === 0) return playlists;
@@ -442,6 +572,7 @@ function Home() {
         <TagFilter
           categories={tagCategories}
           selectedTags={selectedTags}
+          availableTags={availableTags}
           onTagToggle={handleTagToggle}
           onClearAll={() => setSelectedTags([])}
         />

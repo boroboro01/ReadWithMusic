@@ -8,6 +8,7 @@ interface TagCategory {
 interface TagFilterProps {
   categories: TagCategory[];
   selectedTags: string[];
+  availableTags: string[];
   onTagToggle: (tag: string, categoryTitle: string) => void;
   onClearAll: () => void;
 }
@@ -15,6 +16,7 @@ interface TagFilterProps {
 const TagFilter: React.FC<TagFilterProps> = ({
   categories,
   selectedTags,
+  availableTags,
   onTagToggle,
   onClearAll,
 }) => {
@@ -66,7 +68,9 @@ const TagFilter: React.FC<TagFilterProps> = ({
               {category.tags.map((tag) => {
                 const isSelected = selectedTags.includes(tag);
                 const disabledTags = getDisabledTags(category.title);
-                const isDisabled = !isSelected && disabledTags.includes(tag);
+                const isMoodDisabled = !isSelected && disabledTags.includes(tag);
+                const isNotAvailable = !isSelected && !availableTags.includes(tag);
+                const isDisabled = isMoodDisabled || isNotAvailable;
 
                 return (
                   <button
@@ -78,6 +82,10 @@ const TagFilter: React.FC<TagFilterProps> = ({
                       !isDisabled && onTagToggle(tag, category.title)
                     }
                     disabled={isDisabled}
+                    style={{
+                      opacity: isDisabled ? 0.5 : 1,
+                      cursor: isDisabled ? "not-allowed" : "pointer",
+                    }}
                   >
                     {tag}
                   </button>
