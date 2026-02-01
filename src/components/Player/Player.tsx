@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import YouTube from "react-youtube";
 import type { YouTubeProps } from "react-youtube";
 import "../../styles/player.css";
@@ -38,6 +38,83 @@ const Player = (props: Props) => {
   const [volume, setVolume] = useState<number>(60);
   const [muted, setMuted] = useState<boolean>(false);
   const playerRef = useRef<any>(null);
+  const progressIntervalRef = useRef<number | null>(null);
+
+  // Function to update video progress in localStorage
+  const updateVideoProgress = useCallback(
+    (youtubeId: string, currentTime: number, duration: number) => {
+      if (duration <= 0) return; // Avoid division by zero
+
+      const progress = Math.round((currentTime / duration) * 100);
+
+      try {
+        const stored = localStorage.getItem("recent_videos");
+        if (!stored) return;
+
+        let recentVideos = JSON.parse(stored);
+        const videoIndex = recentVideos.findIndex(
+          (item: any) => item.youtube_id === youtubeId,
+        );
+
+        if (videoIndex !== -1) {
+          recentVideos[videoIndex].progress = Math.min(progress, 100);
+          recentVideos[videoIndex].lastTimestamp = currentTime; // Save exact timestamp in seconds
+          localStorage.setItem("recent_videos", JSON.stringify(recentVideos));
+        }
+      } catch (error) {
+        console.error("Failed to update video progress:", error);
+      }
+    },
+    [],
+  );
+
+  // Function to get stored timestamp for a video
+  const getStoredTimestamp = useCallback((youtubeId: string): number => {
+    try {
+      const stored = localStorage.getItem("recent_videos");
+      if (!stored) return 0;
+
+      const recentVideos = JSON.parse(stored);
+      const video = recentVideos.find(
+        (item: any) => item.youtube_id === youtubeId,
+      );
+
+      return video?.lastTimestamp || 0;
+    } catch (error) {
+      console.error("Failed to get stored timestamp:", error);
+      return 0;
+    }
+  }, []);
+
+  // Function to start progress tracking
+  const startProgressTracking = useCallback(() => {
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
+
+    progressIntervalRef.current = setInterval(() => {
+      if (playerRef.current && selectedVideo && isPlaying) {
+        try {
+          const currentTime = playerRef.current.getCurrentTime();
+          const duration = playerRef.current.getDuration();
+
+          if (currentTime && duration && duration > 0) {
+            updateVideoProgress(selectedVideo.id, currentTime, duration);
+          }
+        } catch (error) {
+          console.error("Error tracking progress:", error);
+        }
+      }
+    }, 5000); // Update every 5 seconds
+  }, [selectedVideo, isPlaying, updateVideoProgress]);
+
+  // Function to stop progress tracking
+  const stopProgressTracking = useCallback(() => {
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -113,6 +190,26 @@ const Player = (props: Props) => {
     }
   }, [isExpanded]);
 
+  // Effect to manage progress tracking based on playing state
+  useEffect(() => {
+    if (isPlaying && selectedVideo && isExpanded) {
+      startProgressTracking();
+    } else {
+      stopProgressTracking();
+    }
+
+    // Cleanup on unmount
+    return () => {
+      stopProgressTracking();
+    };
+  }, [
+    isPlaying,
+    selectedVideo,
+    isExpanded,
+    startProgressTracking,
+    stopProgressTracking,
+  ]);
+
   const onReady: YouTubeProps["onReady"] = (event) => {
     playerRef.current = event.target;
     try {
@@ -122,6 +219,20 @@ const Player = (props: Props) => {
       if (muted && playerRef.current?.mute) playerRef.current.mute();
       else if (!muted && playerRef.current?.unMute) playerRef.current.unMute();
     } catch (e) {}
+
+    // Resume playback from stored timestamp
+    if (selectedVideo && playerRef.current) {
+      const storedTimestamp = getStoredTimestamp(selectedVideo.id);
+
+      if (storedTimestamp > 0) {
+        try {
+          // Seek to stored position
+          playerRef.current.seekTo(storedTimestamp, true);
+        } catch (error) {
+          console.error("Failed to seek to stored timestamp:", error);
+        }
+      }
+    }
 
     if (pendingPlay && playerRef.current && playerRef.current.playVideo) {
       try {
@@ -135,8 +246,39 @@ const Player = (props: Props) => {
   const onStateChange: YouTubeProps["onStateChange"] = (event) => {
     const state = event.data;
 
-    if (state === 1) setIsPlaying(true);
-    if (state === 2) setIsPlaying(false);
+    if (state === 1) {
+      setIsPlaying(true);
+      // Start progress tracking when video starts playing
+      if (selectedVideo && isExpanded) {
+        startProgressTracking();
+      }
+    }
+    if (state === 2) {
+      setIsPlaying(false);
+      // Stop progress tracking when video is paused
+      stopProgressTracking();
+    }
+    if (state === 0 && selectedVideo) {
+      // Video ended - update progress to 100% and clear timestamp
+      stopProgressTracking();
+      try {
+        const stored = localStorage.getItem("recent_videos");
+        if (stored) {
+          let recentVideos = JSON.parse(stored);
+          const videoIndex = recentVideos.findIndex(
+            (item: any) => item.youtube_id === selectedVideo.id,
+          );
+
+          if (videoIndex !== -1) {
+            recentVideos[videoIndex].progress = 100;
+            recentVideos[videoIndex].lastTimestamp = 0; // Clear timestamp when video is completed
+            localStorage.setItem("recent_videos", JSON.stringify(recentVideos));
+          }
+        }
+      } catch (error) {
+        console.error("Failed to update completion status:", error);
+      }
+    }
 
     // 아래에 있던 state === 0 관련 if문과 setTimeout을 통째로 삭제하세요.
   };
@@ -233,8 +375,8 @@ const Player = (props: Props) => {
               !isExpanded
                 ? "플레이어를 확장하여 재생"
                 : isPlaying
-                ? "일시정지"
-                : "재생"
+                  ? "일시정지"
+                  : "재생"
             }
           >
             {!isExpanded ? "▶" : isPlaying ? "❚❚" : "▶"}
@@ -264,8 +406,8 @@ const Player = (props: Props) => {
                 muted || volume === 0
                   ? faVolumeXmark
                   : volume < 50
-                  ? faVolumeLow
-                  : faVolumeHigh
+                    ? faVolumeLow
+                    : faVolumeHigh
               }
             />
             <input
