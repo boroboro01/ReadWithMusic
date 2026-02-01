@@ -198,16 +198,19 @@ function Home() {
     setIsPlayerExpanded(true);
 
     // Save to localStorage for recently watched
+    // For now, we'll use a placeholder progress value
+    // This can be updated later when we have access to current playback time
     const recentVideo = {
       youtube_id: v.youtube_id,
       timestamp: Date.now(),
+      progress: 0, // Will be updated with actual progress later
     };
 
     try {
       const stored = localStorage.getItem("recent_videos");
       let recentVideos = stored ? JSON.parse(stored) : [];
 
-      // Remove if already exists (to update timestamp)
+      // Remove if already exists (to update timestamp and progress)
       recentVideos = recentVideos.filter(
         (item: any) => item.youtube_id !== v.youtube_id,
       );
@@ -223,6 +226,31 @@ function Home() {
       console.error("Failed to save to localStorage:", error);
     }
   };
+
+  // Function to update video progress in localStorage
+  const updateVideoProgress = useCallback(
+    (youtubeId: string, currentTime: number, duration: number) => {
+      const progress = Math.round((currentTime / duration) * 100);
+
+      try {
+        const stored = localStorage.getItem("recent_videos");
+        if (!stored) return;
+
+        let recentVideos = JSON.parse(stored);
+        const videoIndex = recentVideos.findIndex(
+          (item: any) => item.youtube_id === youtubeId,
+        );
+
+        if (videoIndex !== -1) {
+          recentVideos[videoIndex].progress = Math.min(progress, 100);
+          localStorage.setItem("recent_videos", JSON.stringify(recentVideos));
+        }
+      } catch (error) {
+        console.error("Failed to update video progress:", error);
+      }
+    },
+    [],
+  );
 
   // 다음 영상 재생 함수
   const playNextVideo = useCallback(() => {

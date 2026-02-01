@@ -12,6 +12,7 @@ interface RecentlyWatchedVideosProps {
 interface RecentVideo {
   youtube_id: string;
   timestamp: number;
+  progress?: number; // Progress percentage (0-100)
 }
 
 const RecentlyWatchedVideos: React.FC<RecentlyWatchedVideosProps> = ({
@@ -44,9 +45,18 @@ const RecentlyWatchedVideos: React.FC<RecentlyWatchedVideosProps> = ({
     if (recentVideos.length === 0) return [];
 
     return recentVideos
-      .map((recent) =>
-        videos.find((video) => video.youtube_id === recent.youtube_id),
-      )
+      .map((recent) => {
+        const video = videos.find(
+          (video) => video.youtube_id === recent.youtube_id,
+        );
+        if (video) {
+          return {
+            ...video,
+            progress: recent.progress || 0, // Include progress from localStorage
+          };
+        }
+        return null;
+      })
       .filter(Boolean); // Remove undefined entries
   }, [recentVideos, videos]);
 
@@ -80,17 +90,65 @@ const RecentlyWatchedVideos: React.FC<RecentlyWatchedVideosProps> = ({
       </div>
 
       <HorizontalList>
-        {recentVideoData.map((video) => (
-          <VideoCard
-            key={video.youtube_id}
-            youtubeId={video.youtube_id}
-            title={video.title}
-            author={video.author}
-            duration={video.duration}
-            isSelected={selectedVideo?.id === video.youtube_id}
-            onSelect={() => onSelect(video)}
-          />
-        ))}
+        {recentVideoData.map((video) => {
+          const progress = video.progress || 0;
+          const thumbnailUrl = `https://img.youtube.com/vi/${video.youtube_id}/hqdefault.jpg`;
+
+          return (
+            <div key={video.youtube_id} className="video-card">
+              {/* Custom thumbnail with progress bar */}
+              <div
+                className="video-thumbnail"
+                style={{ position: "relative", overflow: "hidden" }}
+                role="button"
+                tabIndex={0}
+                onClick={() => onSelect(video)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") onSelect(video);
+                }}
+              >
+                <img src={thumbnailUrl} alt={video.title} />
+                <button
+                  className="video-play-btn"
+                  aria-label={`Play ${video.title}`}
+                >
+                  ▶
+                </button>
+                {/* Progress bar overlay */}
+                {progress > 0 && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "0",
+                      left: "0",
+                      right: "0",
+                      height: "3px",
+                      backgroundColor: "rgba(0, 0, 0, 0.3)",
+                      pointerEvents: "none",
+                      zIndex: 10,
+                    }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: `${Math.min(progress, 100)}%`,
+                        backgroundColor: "#ff0000",
+                        transition: "width 0.3s ease",
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Video metadata */}
+              <div className="video-meta">
+                <span className="video-duration">{video.duration}</span>
+                <div className="video-title">{video.title}</div>
+                <div className="video-author">{video.author}</div>
+              </div>
+            </div>
+          );
+        })}
       </HorizontalList>
     </section>
   );
