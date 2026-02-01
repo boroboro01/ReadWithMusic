@@ -425,6 +425,16 @@ function Home() {
     });
   };
 
+  // 특정 카테고리의 선택된 태그들을 모두 해제하는 함수
+  const handleClearCategory = (categoryTitle: string) => {
+    setSelectedTags((prev) => {
+      const categoryTags =
+        tagCategories.find((cat) => cat.title === categoryTitle)?.tags || [];
+      // 해당 카테고리에 속하지 않는 태그들만 유지
+      return prev.filter((tag) => !categoryTags.includes(tag));
+    });
+  };
+
   const handleSelect = (v: any) => {
     setSelectedVideo({
       id: v.youtube_id,
@@ -575,6 +585,7 @@ function Home() {
           availableTags={availableTags}
           onTagToggle={handleTagToggle}
           onClearAll={() => setSelectedTags([])}
+          onClearCategory={handleClearCategory}
         />
       </ContentContainer>
 
