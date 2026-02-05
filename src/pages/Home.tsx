@@ -587,11 +587,23 @@ function Home() {
           onClearAll={() => setSelectedTags([])}
           onClearCategory={handleClearCategory}
         />
+        {/* Search Result Count - Show when tags are selected */}
+        {selectedTags.length > 0 && (
+          <div className="search-result-count">
+            총 검색 결과{" "}
+            <span className="count-number">{filteredPlaylists.length}</span>개
+          </div>
+        )}
       </ContentContainer>
 
-      <ContentContainer>
-        <RecentlyWatchedVideos videos={videos} onSelect={handleSelect} />
-      </ContentContainer>
+      {/* Recently Watched Section - Hide when tags are selected */}
+      {selectedTags.length === 0 && (
+        <ContentContainer>
+          <div className="content-transition">
+            <RecentlyWatchedVideos videos={videos} onSelect={handleSelect} />
+          </div>
+        </ContentContainer>
+      )}
 
       {selectedTags.length > 0 && filteredPlaylists.length === 0 ? (
         <ContentContainer>

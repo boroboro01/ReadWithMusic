@@ -5,11 +5,56 @@
 }
 
 body {
-  font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
+  font-family:
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
     sans-serif;
   color: #f9fafb;
   line-height: 1.65;
   font-weight: 400;
+}
+
+/* Smooth transitions for content sections */
+.content-transition {
+  transition:
+    opacity 0.3s ease-in-out,
+    transform 0.3s ease-in-out;
+}
+
+.content-enter {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.content-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.content-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.content-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Search result count styling */
+.search-result-count {
+  margin-top: 16px;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  font-weight: 400;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.search-result-count .count-number {
+  color: #e5e7eb;
+  font-weight: 600;
 }
 .page-title {
   font-size: 24px;
