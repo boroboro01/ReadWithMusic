@@ -4,7 +4,7 @@ import type { YouTubeProps } from "react-youtube";
 import "../../styles/player.css";
 import type { Video } from "../../types/video";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import rainSound from "../../assets/ambient/rain.wav";
+import rainSound from "../../assets/ambient/rain.mp3";
 import fireplaceSound from "../../assets/ambient/fireplace.mp3";
 import cafeSound from "../../assets/ambient/cafe.mp3";
 import {
@@ -537,6 +537,7 @@ const Player = (props: Props) => {
 
         {/* 좌측 사이드바 버튼들 */}
         <div
+          className="ambient-controls"
           style={{
             position: "absolute",
             left: "24px",
