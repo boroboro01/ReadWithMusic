@@ -75,7 +75,7 @@ function Header({
             }}
             onClick={() => {
               // 의견 남기기 폼을 새 창에서 열기
-              window.open("https://tally.so/r/GxpAk2", "_blank");
+              window.open("https://tally.so/r/7RxYG6", "_blank");
             }}
           >
             의견 남기기
@@ -99,7 +99,7 @@ function Header({
                 textAlign: "right",
               }}
             >
-              의견을 남겨주시면 기프티콘을 드려요 ☺️
+              더 나은 서비스를 위해 의견을 남겨주세요 ☺️
               <div
                 style={{
                   position: "absolute",
