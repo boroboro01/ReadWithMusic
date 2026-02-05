@@ -10,6 +10,7 @@ import PlaylistTags from "../components/common/PlaylistTags";
 import TagFilter from "../components/common/TagFilter";
 import IntroSection from "../components/common/IntroSection";
 import RecentlyWatchedVideos from "../components/common/RecentlyWatchedVideos";
+import ScrollToTop from "../components/common/ScrollToTop";
 import type { Video } from "../types/video";
 import "../styles/intro.css";
 
@@ -747,6 +748,8 @@ function Home() {
           않습니다.
         </div>
       </footer>
+
+      <ScrollToTop />
     </MainLayout>
   );
 }
