@@ -4,6 +4,9 @@ import type { YouTubeProps } from "react-youtube";
 import "../../styles/player.css";
 import type { Video } from "../../types/video";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import rainSound from "../../assets/ambient/rain.mp3";
+import fireplaceSound from "../../assets/ambient/fireplace.mp3";
+import cafeSound from "../../assets/ambient/cafe.mp3";
 import {
   faVolumeHigh,
   faVolumeLow,
@@ -12,6 +15,10 @@ import {
   faCompress,
   faStepBackward,
   faStepForward,
+  faHome,
+  faCloudRain,
+  faFire,
+  faCoffee,
 } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
@@ -37,6 +44,27 @@ const Player = (props: Props) => {
   const [pendingPlay, setPendingPlay] = useState(false);
   const [volume, setVolume] = useState<number>(60);
   const [muted, setMuted] = useState<boolean>(false);
+  const [activeSounds, setActiveSounds] = useState<{
+    rain: boolean;
+    fire: boolean;
+    cafe: boolean;
+  }>({ rain: false, fire: false, cafe: false });
+  const [soundVolumes, setSoundVolumes] = useState<{
+    rain: number;
+    fire: number;
+    cafe: number;
+  }>({ rain: 30, fire: 30, cafe: 30 });
+  const [sliderHover, setSliderHover] = useState<{
+    main: boolean;
+    rain: boolean;
+    fire: boolean;
+    cafe: boolean;
+  }>({ main: false, rain: false, fire: false, cafe: false });
+  const [audioRefs] = useState<{
+    rain: HTMLAudioElement | null;
+    fire: HTMLAudioElement | null;
+    cafe: HTMLAudioElement | null;
+  }>({ rain: null, fire: null, cafe: null });
   const playerRef = useRef<any>(null);
   const progressIntervalRef = useRef<number | null>(null);
 
@@ -324,6 +352,63 @@ const Player = (props: Props) => {
     } catch {}
   }, [volume, muted]);
 
+  // 사운드 토글 함수들
+  const toggleSound = (
+    soundType: "rain" | "fire" | "cafe",
+    audioUrl: string,
+  ) => {
+    const currentAudio = audioRefs[soundType];
+
+    if (activeSounds[soundType]) {
+      // 현재 재생 중이면 정지
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+      setActiveSounds((prev) => ({ ...prev, [soundType]: false }));
+    } else {
+      // 재생 시작
+      if (currentAudio) {
+        currentAudio.volume = soundVolumes[soundType] / 100;
+        currentAudio.currentTime = 0; // 처음부터 재생
+        currentAudio.play().catch(console.error);
+      } else {
+        const newAudio = new Audio(audioUrl);
+        newAudio.loop = true; // 자동 반복 설정
+        newAudio.volume = soundVolumes[soundType] / 100;
+
+        // ended 이벤트 리스너 추가 - 더 확실한 반복 재생을 위해
+        newAudio.addEventListener("ended", () => {
+          if (activeSounds[soundType]) {
+            newAudio.currentTime = 0;
+            newAudio.play().catch(console.error);
+          }
+        });
+
+        // 오류 발생 시 이벤트 리스너
+        newAudio.addEventListener("error", (e) => {
+          console.error(`오디오 재생 오류 (${soundType}):`, e);
+        });
+
+        audioRefs[soundType] = newAudio;
+        newAudio.play().catch(console.error);
+      }
+      setActiveSounds((prev) => ({ ...prev, [soundType]: true }));
+    }
+  };
+
+  // 사운드 볼륨 조절 함수
+  const updateSoundVolume = (
+    soundType: "rain" | "fire" | "cafe",
+    volume: number,
+  ) => {
+    setSoundVolumes((prev) => ({ ...prev, [soundType]: volume }));
+    const currentAudio = audioRefs[soundType];
+    if (currentAudio) {
+      currentAudio.volume = volume / 100;
+    }
+  };
+
   if (!selectedVideo) {
     return <div className="player-container hidden" />;
   }
@@ -417,6 +502,20 @@ const Player = (props: Props) => {
               max={100}
               value={muted ? 0 : volume}
               onChange={onVolumeInput}
+              onMouseEnter={() =>
+                setSliderHover((prev) => ({ ...prev, main: true }))
+              }
+              onMouseLeave={() =>
+                setSliderHover((prev) => ({ ...prev, main: false }))
+              }
+              style={{
+                background: `linear-gradient(to right, ${sliderHover.main ? "#ffffff" : "#d1d1d1"} 0%, ${sliderHover.main ? "#ffffff" : "#d1d1d1"} ${muted ? 0 : volume}%, rgba(255,255,255,0.2) ${muted ? 0 : volume}%, rgba(255,255,255,0.2) 100%)`,
+                WebkitAppearance: "none",
+                appearance: "none",
+                outline: "none",
+                borderRadius: "2px",
+                cursor: "pointer",
+              }}
             />
           </div>
           {/* 맨 오른쪽 확장/축소 버튼 */}
@@ -435,6 +534,293 @@ const Player = (props: Props) => {
 
       <div className="player-full" onClick={(e) => e.stopPropagation()}>
         <div className="collapse-handle" aria-hidden />
+
+        {/* 좌측 사이드바 버튼들 */}
+        <div
+          className="ambient-controls"
+          style={{
+            position: "absolute",
+            left: "24px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "16px",
+            zIndex: 10,
+          }}
+        >
+          {/* 네비게이션 그룹 */}
+          <button
+            onClick={() => {
+              onExpandedChange(false);
+            }}
+            style={{
+              width: "40px",
+              height: "40px",
+              borderRadius: "12px",
+              backgroundColor: "rgba(255, 255, 255, 0.15)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              color: "#ffffff",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+              backdropFilter: "blur(20px) saturate(180%)",
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor =
+                "rgba(255, 255, 255, 0.25)";
+              e.currentTarget.style.transform = "scale(1.05)";
+              e.currentTarget.style.boxShadow =
+                "0 12px 40px rgba(0, 0, 0, 0.2)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor =
+                "rgba(255, 255, 255, 0.15)";
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.boxShadow =
+                "0 8px 32px rgba(0, 0, 0, 0.12)";
+            }}
+            title="홈으로 돌아가기 - 플레이어를 닫고 메인 화면으로 이동합니다"
+          >
+            <FontAwesomeIcon icon={faHome} size="sm" />
+          </button>
+
+          {/* 구분선 */}
+          <div
+            style={{
+              width: "40px",
+              height: "1px",
+              backgroundColor: "rgba(255, 255, 255, 0.2)",
+              margin: "0",
+            }}
+          />
+
+          {/* 앰비언트 사운드 그룹 */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <button
+              onClick={() => toggleSound("rain", rainSound)}
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "12px",
+                backgroundColor: activeSounds.rain
+                  ? "rgba(59, 130, 246, 0.3)"
+                  : "rgba(255, 255, 255, 0.15)",
+                border: activeSounds.rain
+                  ? "1px solid rgba(59, 130, 246, 0.5)"
+                  : "1px solid rgba(255, 255, 255, 0.1)",
+                color: activeSounds.rain ? "#7dd3fc" : "#ffffff",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+                backdropFilter: "blur(20px) saturate(180%)",
+                boxShadow: activeSounds.rain
+                  ? "0 8px 32px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)"
+                  : "0 8px 32px rgba(0, 0, 0, 0.12)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = activeSounds.rain
+                  ? "rgba(59, 130, 246, 0.4)"
+                  : "rgba(255, 255, 255, 0.25)";
+                e.currentTarget.style.transform = "scale(1.05)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = activeSounds.rain
+                  ? "rgba(59, 130, 246, 0.3)"
+                  : "rgba(255, 255, 255, 0.15)";
+                e.currentTarget.style.transform = "scale(1)";
+              }}
+              title={
+                activeSounds.rain
+                  ? "비 소리 끄기 - 현재 재생 중"
+                  : "비 소리 켜기 - 집중에 도움이 되는 빗소리"
+              }
+            >
+              <FontAwesomeIcon icon={faCloudRain} size="sm" />
+            </button>
+
+            <input
+              className="volume-slider"
+              type="range"
+              min="0"
+              max="100"
+              value={soundVolumes.rain}
+              onChange={(e) =>
+                updateSoundVolume("rain", parseInt(e.target.value))
+              }
+              onMouseEnter={() =>
+                setSliderHover((prev) => ({ ...prev, rain: true }))
+              }
+              onMouseLeave={() =>
+                setSliderHover((prev) => ({ ...prev, rain: false }))
+              }
+              style={{
+                width: "60px",
+                height: "4px",
+                background: `linear-gradient(to right, ${sliderHover.rain ? "#ffffff" : "#d1d1d1"} 0%, ${sliderHover.rain ? "#ffffff" : "#d1d1d1"} ${soundVolumes.rain}%, rgba(255,255,255,0.2) ${soundVolumes.rain}%, rgba(255,255,255,0.2) 100%)`,
+                WebkitAppearance: "none",
+                appearance: "none",
+                outline: "none",
+                borderRadius: "2px",
+                cursor: "pointer",
+              }}
+              title={`비 소리 음량: ${soundVolumes.rain}%`}
+            />
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <button
+              onClick={() => toggleSound("fire", fireplaceSound)}
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "12px",
+                backgroundColor: activeSounds.fire
+                  ? "rgba(251, 146, 60, 0.3)"
+                  : "rgba(255, 255, 255, 0.15)",
+                border: activeSounds.fire
+                  ? "1px solid rgba(251, 146, 60, 0.5)"
+                  : "1px solid rgba(255, 255, 255, 0.1)",
+                color: activeSounds.fire ? "#fdba74" : "#ffffff",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+                backdropFilter: "blur(20px) saturate(180%)",
+                boxShadow: activeSounds.fire
+                  ? "0 8px 32px rgba(251, 146, 60, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)"
+                  : "0 8px 32px rgba(0, 0, 0, 0.12)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = activeSounds.fire
+                  ? "rgba(251, 146, 60, 0.4)"
+                  : "rgba(255, 255, 255, 0.25)";
+                e.currentTarget.style.transform = "scale(1.05)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = activeSounds.fire
+                  ? "rgba(251, 146, 60, 0.3)"
+                  : "rgba(255, 255, 255, 0.15)";
+                e.currentTarget.style.transform = "scale(1)";
+              }}
+              title={
+                activeSounds.fire
+                  ? "모닥불 소리 끄기 - 현재 재생 중"
+                  : "모닥불 소리 켜기 - 따뜻하고 포근한 장작 타는 소리"
+              }
+            >
+              <FontAwesomeIcon icon={faFire} size="sm" />
+            </button>
+
+            <input
+              className="volume-slider"
+              type="range"
+              min="0"
+              max="100"
+              value={soundVolumes.fire}
+              onChange={(e) =>
+                updateSoundVolume("fire", parseInt(e.target.value))
+              }
+              onMouseEnter={() =>
+                setSliderHover((prev) => ({ ...prev, fire: true }))
+              }
+              onMouseLeave={() =>
+                setSliderHover((prev) => ({ ...prev, fire: false }))
+              }
+              style={{
+                width: "60px",
+                height: "4px",
+                background: `linear-gradient(to right, ${sliderHover.fire ? "#ffffff" : "#d1d1d1"} 0%, ${sliderHover.fire ? "#ffffff" : "#d1d1d1"} ${soundVolumes.fire}%, rgba(255,255,255,0.2) ${soundVolumes.fire}%, rgba(255,255,255,0.2) 100%)`,
+                WebkitAppearance: "none",
+                appearance: "none",
+                outline: "none",
+                borderRadius: "2px",
+                cursor: "pointer",
+              }}
+              title={`모닥불 소리 음량: ${soundVolumes.fire}%`}
+            />
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <button
+              onClick={() => toggleSound("cafe", cafeSound)}
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "12px",
+                backgroundColor: activeSounds.cafe
+                  ? "rgba(120, 113, 108, 0.3)"
+                  : "rgba(255, 255, 255, 0.15)",
+                border: activeSounds.cafe
+                  ? "1px solid rgba(120, 113, 108, 0.5)"
+                  : "1px solid rgba(255, 255, 255, 0.1)",
+                color: activeSounds.cafe ? "#d6d3d1" : "#ffffff",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+                backdropFilter: "blur(20px) saturate(180%)",
+                boxShadow: activeSounds.cafe
+                  ? "0 8px 32px rgba(120, 113, 108, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)"
+                  : "0 8px 32px rgba(0, 0, 0, 0.12)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = activeSounds.cafe
+                  ? "rgba(120, 113, 108, 0.4)"
+                  : "rgba(255, 255, 255, 0.25)";
+                e.currentTarget.style.transform = "scale(1.05)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = activeSounds.cafe
+                  ? "rgba(120, 113, 108, 0.3)"
+                  : "rgba(255, 255, 255, 0.15)";
+                e.currentTarget.style.transform = "scale(1)";
+              }}
+              title={
+                activeSounds.cafe
+                  ? "카페 소리 끄기 - 현재 재생 중"
+                  : "카페 소리 켜기 - 편안한 카페 분위기 소리"
+              }
+            >
+              <FontAwesomeIcon icon={faCoffee} size="sm" />
+            </button>
+
+            <input
+              className="volume-slider"
+              type="range"
+              min="0"
+              max="100"
+              value={soundVolumes.cafe}
+              onChange={(e) =>
+                updateSoundVolume("cafe", parseInt(e.target.value))
+              }
+              onMouseEnter={() =>
+                setSliderHover((prev) => ({ ...prev, cafe: true }))
+              }
+              onMouseLeave={() =>
+                setSliderHover((prev) => ({ ...prev, cafe: false }))
+              }
+              style={{
+                width: "60px",
+                height: "4px",
+                background: `linear-gradient(to right, ${sliderHover.cafe ? "#ffffff" : "#d1d1d1"} 0%, ${sliderHover.cafe ? "#ffffff" : "#d1d1d1"} ${soundVolumes.cafe}%, rgba(255,255,255,0.2) ${soundVolumes.cafe}%, rgba(255,255,255,0.2) 100%)`,
+                WebkitAppearance: "none",
+                appearance: "none",
+                outline: "none",
+                borderRadius: "2px",
+                cursor: "pointer",
+              }}
+              title={`카페 소리 음량: ${soundVolumes.cafe}%`}
+            />
+          </div>
+        </div>
         <div className="player-header">
           <div className="video-info">
             <h3 className="full-title">{selectedVideo.title}</h3>

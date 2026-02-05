@@ -341,6 +341,11 @@
   background: #f9fafb;
   cursor: pointer;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  opacity: 0;
+}
+
+.volume-slider:hover::-webkit-slider-thumb {
+  opacity: 1;
 }
 
 .volume-slider::-moz-range-thumb {
@@ -350,6 +355,11 @@
   background: #f9fafb;
   cursor: pointer;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  opacity: 0;
+}
+
+.volume-slider:hover::-moz-range-thumb {
+  opacity: 1;
 }
 
 /* 내부 iframe이 위에서 제한한 영역을 꽉 채우게 함 */
@@ -384,5 +394,32 @@
   .policy-notice {
     font-size: 12px;
     padding: 10px 12px;
+  }
+
+  /* 모바일에서 ambient 컨트롤을 아래쪽으로 이동 */
+  .ambient-controls {
+    position: absolute !important;
+    left: 50% !important;
+    top: auto !important;
+    bottom: 120px !important;
+    transform: translateX(-50%) !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    width: calc(100% - 48px) !important;
+    max-width: 400px !important;
+  }
+
+  /* 모바일에서 버튼과 슬라이더 컨테이너 스타일 */
+  .ambient-controls > div {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  /* 모바일에서 구분선 숨김 */
+  .ambient-controls > div:nth-child(2) {
+    display: none !important;
   }
 }

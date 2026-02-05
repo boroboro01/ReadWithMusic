@@ -5,11 +5,105 @@
 }
 
 body {
-  font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
+  font-family:
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
     sans-serif;
   color: #f9fafb;
   line-height: 1.65;
   font-weight: 400;
+}
+
+/* Smooth transitions for content sections */
+.content-transition {
+  transition:
+    opacity 0.3s ease-in-out,
+    transform 0.3s ease-in-out;
+}
+
+.content-enter {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.content-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.content-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.content-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Search result count styling */
+.search-result-count {
+  margin-top: 16px;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  font-weight: 400;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.search-result-count .count-number {
+  color: #e5e7eb;
+  font-weight: 600;
+}
+
+/* ======================
+   Scroll to Top Button
+   ====================== */
+
+.scroll-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: rgba(31, 31, 31, 0.9);
+  color: #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  /* Hidden on mobile by default */
+  display: none;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.scroll-to-top:hover {
+  background-color: rgba(55, 55, 55, 0.95);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.scroll-to-top:hover svg {
+  transform: translateY(-1px);
+}
+
+.scroll-to-top svg {
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+/* Only show on medium screens and larger (768px+) */
+@media (min-width: 768px) {
+  .scroll-to-top {
+    display: flex;
+  }
 }
 .page-title {
   font-size: 24px;

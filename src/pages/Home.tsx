@@ -10,6 +10,7 @@ import PlaylistTags from "../components/common/PlaylistTags";
 import TagFilter from "../components/common/TagFilter";
 import IntroSection from "../components/common/IntroSection";
 import RecentlyWatchedVideos from "../components/common/RecentlyWatchedVideos";
+import ScrollToTop from "../components/common/ScrollToTop";
 import type { Video } from "../types/video";
 import "../styles/intro.css";
 
@@ -587,11 +588,23 @@ function Home() {
           onClearAll={() => setSelectedTags([])}
           onClearCategory={handleClearCategory}
         />
+        {/* Search Result Count - Show when tags are selected */}
+        {selectedTags.length > 0 && (
+          <div className="search-result-count">
+            총 검색 결과{" "}
+            <span className="count-number">{filteredPlaylists.length}</span>개
+          </div>
+        )}
       </ContentContainer>
 
-      <ContentContainer>
-        <RecentlyWatchedVideos videos={videos} onSelect={handleSelect} />
-      </ContentContainer>
+      {/* Recently Watched Section - Hide when tags are selected */}
+      {selectedTags.length === 0 && (
+        <ContentContainer>
+          <div className="content-transition">
+            <RecentlyWatchedVideos videos={videos} onSelect={handleSelect} />
+          </div>
+        </ContentContainer>
+      )}
 
       {selectedTags.length > 0 && filteredPlaylists.length === 0 ? (
         <ContentContainer>
@@ -735,6 +748,8 @@ function Home() {
           않습니다.
         </div>
       </footer>
+
+      <ScrollToTop />
     </MainLayout>
   );
 }
